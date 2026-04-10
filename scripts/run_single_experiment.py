@@ -1,7 +1,6 @@
 """Run a single baseline or unlabeled-logreg experiment from the command line."""
 
 import argparse
-import json
 import sys
 from pathlib import Path
 
@@ -18,64 +17,70 @@ from project1.experiments.runner import run_single_experiment
 def parse_args():
     """Parse command-line arguments for a single experiment run."""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("dataset_name", choices=get_supported_datasets(), help="Dataset used in the experiment.")
+    parser.add_argument("--dataset", required=True, choices=get_supported_datasets(), help="Dataset used in the run.")
     parser.add_argument(
-        "model_name",
-        choices=["naive_logreg", "oracle_logreg", "unlabeled_logreg"],
-        help="Model to evaluate.",
+        "--scheme",
+        required=True,
+        choices=["mcar", "mar1", "mar2", "mnar"],
+        help="Missing-label mechanism applied only to the training labels.",
     )
     parser.add_argument(
-        "--missingness",
-        default="MCAR",
-        choices=["MCAR", "MAR1", "MAR2", "MNAR"],
-        help="Missing-label mechanism applied to the training labels only.",
+        "--method",
+        required=True,
+        choices=["naive", "oracle", "unlabeled"],
+        help="Modeling approach used in the experiment.",
     )
-    parser.add_argument("--missing-proba", type=float, default=0.3, help="Missing-label probability in train.")
-    parser.add_argument("--random-state", type=int, default=42, help="Random seed for the run.")
-    parser.add_argument("--test-size", type=float, default=0.2, help="Fraction of samples assigned to test.")
-    parser.add_argument("--valid-size", type=float, default=0.2, help="Fraction of samples assigned to validation.")
+    parser.add_argument("--missing-rate", required=True, type=float, help="Missing-label rate used in training only.")
+    parser.add_argument("--seed", required=True, type=int, help="Random seed for the full run.")
     parser.add_argument(
-        "--correlation-threshold",
-        type=float,
-        default=0.95,
-        help="Threshold for dropping highly correlated features during preprocessing.",
-    )
-    parser.add_argument(
-        "--unlabeled-imputation-type",
+        "--label-completion-method",
         default="logistic",
         choices=["logistic", "knn", "prior"],
-        help="Imputation strategy used only for `unlabeled_logreg`.",
-    )
-    parser.add_argument(
-        "--mar1-column-index",
-        type=int,
-        default=0,
-        help="Feature index used by the MAR1 missingness generator.",
+        help="Label-completion method used only when --method unlabeled.",
     )
     return parser.parse_args()
 
 
+def _format_result(result):
+    """Format the experiment result into a readable terminal summary."""
+    ordered_keys = [
+        "dataset",
+        "scheme",
+        "method",
+        "label_completion_method",
+        "seed",
+        "missing_rate",
+        "accuracy",
+        "balanced_accuracy",
+        "f1",
+        "roc_auc",
+        "train_size",
+        "valid_size",
+        "test_size",
+        "n_features_before_preprocessing",
+        "n_features_after_preprocessing",
+        "observed_label_fraction_train",
+    ]
+    lines = ["Single experiment result"]
+    for key in ordered_keys:
+        if key in result:
+            lines.append(f"{key}: {result[key]}")
+    return "\n".join(lines)
+
+
 def main():
-    """Run one experiment and print the result as formatted JSON."""
+    """Run one experiment and print the result in a readable terminal format."""
     args = parse_args()
 
-    missingness_kwargs = {}
-    if args.missingness == "MAR1":
-        missingness_kwargs["missing_influence_col_index"] = args.mar1_column_index
-
     result = run_single_experiment(
-        dataset_name=args.dataset_name,
-        model_name=args.model_name,
-        missingness=args.missingness,
-        missing_proba=args.missing_proba,
-        random_state=args.random_state,
-        test_size=args.test_size,
-        valid_size=args.valid_size,
-        correlation_threshold=args.correlation_threshold,
-        unlabeled_imputation_type=args.unlabeled_imputation_type,
-        missingness_kwargs=missingness_kwargs,
+        dataset=args.dataset,
+        scheme=args.scheme,
+        method=args.method,
+        missing_rate=args.missing_rate,
+        seed=args.seed,
+        label_completion_method=args.label_completion_method,
     )
-    print(json.dumps(result, indent=2, sort_keys=True))
+    print(_format_result(result))
 
 
 if __name__ == "__main__":

@@ -12,10 +12,10 @@ from project1.models.unlabeled_logreg import UnlabeledLogReg
 
 
 _MISSINGNESS_GENERATORS = {
-    "MCAR": MCAR,
-    "MAR1": MAR1,
-    "MAR2": MAR2,
-    "MNAR": MNAR,
+    "mcar": MCAR,
+    "mar1": MAR1,
+    "mar2": MAR2,
+    "mnar": MNAR,
 }
 
 
@@ -47,33 +47,33 @@ def _generate_missing_train_labels(X_train, y_train, missingness, missing_proba,
     return generator(X_train, y_train, missing_proba, seed=random_state, **missingness_kwargs).astype(int)
 
 
-def _build_model(model_name, random_state, unlabeled_imputation_type="logistic", **model_kwargs):
+def _build_model(method, random_state, label_completion_method="logistic", **model_kwargs):
     """Instantiate a supported experiment model."""
-    if model_name == "naive_logreg":
+    if method == "naive":
         return NaiveLogReg(random_state=random_state, **model_kwargs)
-    if model_name == "oracle_logreg":
+    if method == "oracle":
         return OracleLogReg(random_state=random_state, **model_kwargs)
-    if model_name == "unlabeled_logreg":
+    if method == "unlabeled":
         return UnlabeledLogReg(
-            imputation_type=unlabeled_imputation_type,
+            imputation_type=label_completion_method,
             random_state=random_state,
             **model_kwargs,
         )
 
-    valid_models = "naive_logreg, oracle_logreg, unlabeled_logreg"
-    raise ValueError(f"Unsupported model_name: {model_name}. Valid options: {valid_models}")
+    valid_methods = "naive, oracle, unlabeled"
+    raise ValueError(f"Unsupported method: {method}. Valid options: {valid_methods}")
 
 
 def run_single_experiment(
-    dataset_name,
-    model_name,
-    missingness="MCAR",
-    missing_proba=0.3,
-    random_state=42,
+    dataset,
+    scheme,
+    method,
+    missing_rate,
+    seed=42,
+    label_completion_method="logistic",
     test_size=0.2,
     valid_size=0.2,
     correlation_threshold=0.95,
-    unlabeled_imputation_type="logistic",
     missingness_kwargs=None,
     model_kwargs=None,
 ):
@@ -81,24 +81,24 @@ def run_single_experiment(
 
     Parameters
     ----------
-    dataset_name : str
+    dataset : str
         Dataset name supported by `load_dataset`.
-    model_name : str
-        One of `naive_logreg`, `oracle_logreg`, or `unlabeled_logreg`.
-    missingness : str, default="MCAR"
-        Missing-label generator applied only to the training labels.
-    missing_proba : float, default=0.3
+    scheme : str
+        One of `mcar`, `mar1`, `mar2`, or `mnar`.
+    method : str
+        One of `naive`, `oracle`, or `unlabeled`.
+    missing_rate : float
         Fraction or average probability of missing labels in train.
-    random_state : int, default=42
+    seed : int, default=42
         Random seed used in splitting, missingness, and model initialization.
+    label_completion_method : str, default="logistic"
+        Imputation strategy passed to `UnlabeledLogReg` when `method="unlabeled"`.
     test_size : float, default=0.2
         Fraction of data assigned to the test split.
     valid_size : float, default=0.2
         Fraction of data assigned to the validation split.
     correlation_threshold : float, default=0.95
         Threshold for dropping highly correlated features during preprocessing.
-    unlabeled_imputation_type : str, default="logistic"
-        Imputation strategy passed to `UnlabeledLogReg`.
     missingness_kwargs : dict or None
         Extra keyword arguments forwarded to the missingness generator.
     model_kwargs : dict or None
@@ -109,14 +109,27 @@ def run_single_experiment(
     dict
         Single-row experiment result with metadata and test metrics.
     """
+    scheme = scheme.lower()
+    method = method.lower()
+    label_completion_method = label_completion_method.lower()
+
+    if method != "unlabeled" and label_completion_method != "logistic":
+        raise ValueError("label_completion_method is only applicable when method='unlabeled'.")
+
+    if label_completion_method not in {"logistic", "knn", "prior"}:
+        raise ValueError("label_completion_method must be one of: logistic, knn, prior.")
+
     missingness_kwargs = {} if missingness_kwargs is None else dict(missingness_kwargs)
     model_kwargs = {} if model_kwargs is None else dict(model_kwargs)
 
-    X, y, feature_names = load_dataset(dataset_name)
+    if scheme == "mar1":
+        missingness_kwargs.setdefault("missing_influence_col_index", 0)
+
+    X, y, feature_names = load_dataset(dataset)
     X_train, X_valid, X_test, y_train, y_valid, y_test = make_data_split(
         X,
         y,
-        random_state=random_state,
+        random_state=seed,
         test_size=test_size,
         valid_size=valid_size,
     )
@@ -134,22 +147,22 @@ def run_single_experiment(
     y_train_obs = _generate_missing_train_labels(
         prepared.X_train,
         prepared.y_train,
-        missingness=missingness,
-        missing_proba=missing_proba,
-        random_state=random_state,
+        missingness=scheme,
+        missing_proba=missing_rate,
+        random_state=seed,
         **missingness_kwargs,
     )
 
     model = _build_model(
-        model_name,
-        random_state=random_state,
-        unlabeled_imputation_type=unlabeled_imputation_type,
+        method,
+        random_state=seed,
+        label_completion_method=label_completion_method,
         **model_kwargs,
     )
 
-    if model_name == "naive_logreg":
+    if method == "naive":
         model.fit(prepared.X_train, y_train_obs)
-    elif model_name == "oracle_logreg":
+    elif method == "oracle":
         model.fit(prepared.X_train, prepared.y_train)
     else:
         model.fit(prepared.X_train, y_train_obs, X_validate=prepared.X_valid, y_validate=prepared.y_valid)
@@ -160,11 +173,15 @@ def run_single_experiment(
 
     observed_fraction = float(np.mean(y_train_obs != -1))
     result = {
-        "dataset_name": dataset_name,
-        "model_name": model_name,
-        "missingness": missingness,
-        "missing_proba": missing_proba,
-        "random_state": random_state,
+        "dataset": dataset,
+        "scheme": scheme,
+        "method": method,
+        "seed": seed,
+        "missing_rate": missing_rate,
+        "accuracy": metrics["accuracy"],
+        "balanced_accuracy": metrics["balanced_accuracy"],
+        "f1": metrics["f1"],
+        "roc_auc": metrics["roc_auc"],
         "train_size": int(prepared.X_train.shape[0]),
         "valid_size": int(prepared.X_valid.shape[0]),
         "test_size": int(prepared.X_test.shape[0]),
@@ -172,10 +189,9 @@ def run_single_experiment(
         "n_features_after_preprocessing": int(len(prepared.feature_names)),
         "observed_label_fraction_train": observed_fraction,
     }
-    if model_name == "unlabeled_logreg":
-        result["unlabeled_imputation_type"] = unlabeled_imputation_type
+    if method == "unlabeled":
+        result["label_completion_method"] = label_completion_method
 
-    result.update(metrics)
     return result
 
 
