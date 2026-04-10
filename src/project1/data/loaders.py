@@ -88,12 +88,28 @@ _DATASET_LOADERS = {
 }
 
 
+def get_supported_datasets():
+    """Return the sorted list of dataset names supported by the local ARFF loaders."""
+    return sorted(_DATASET_LOADERS)
+
+
+def get_dataset_path(dataset_name):
+    """Return the local ARFF path for a supported dataset name."""
+    if dataset_name not in _DATASET_ARFF_PATHS:
+        supported_datasets = ", ".join(get_supported_datasets())
+        raise ValueError(f"Unsupported dataset: {dataset_name}. Supported datasets: {supported_datasets}")
+    return _DATASET_ARFF_PATHS[dataset_name]
+
+
 def load_dataset(dataset_name):
     """Load a supported dataset by name and return `(X, y, feature_names)`."""
     if dataset_name in _DATASET_LOADERS:
         return _DATASET_LOADERS[dataset_name]()
 
-    supported_datasets = ", ".join(sorted(_DATASET_ARFF_PATHS))
+    supported_datasets = ", ".join(get_supported_datasets())
     raise ValueError(
         f"Unsupported dataset: {dataset_name}. Supported datasets in this loader stage: {supported_datasets}"
     )
+
+
+__all__ = ["get_supported_datasets", "get_dataset_path", "load_dataset"]
