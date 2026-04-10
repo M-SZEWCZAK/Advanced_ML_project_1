@@ -64,12 +64,17 @@ def main():
 
     print(f"Dataset: {args.dataset_name}")
     print(f"ARFF path: {get_dataset_path(args.dataset_name)}")
-    print(f"Raw shape: X={X.shape}, y={y.shape}, features={len(feature_names)}")
+    print(f"Number of observations: {len(y)}")
+    print(f"Number of features before preprocessing: {len(feature_names)}")
+    print(f"Number of features after preprocessing: {len(prepared.feature_names)}")
     print(
-        "Processed shapes: "
+        "Split sizes: "
+        f"train={prepared.X_train.shape[0]}, valid={prepared.X_valid.shape[0]}, test={prepared.X_test.shape[0]}"
+    )
+    print(
+        "Processed array shapes: "
         f"train={prepared.X_train.shape}, valid={prepared.X_valid.shape}, test={prepared.X_test.shape}"
     )
-    print(f"Final feature count: {len(prepared.feature_names)}")
     print(f"Train labels: {_format_class_distribution(prepared.y_train)}")
     print(f"Valid labels: {_format_class_distribution(prepared.y_valid)}")
     print(f"Test labels: {_format_class_distribution(prepared.y_test)}")
