@@ -17,8 +17,8 @@ from project1.experiments.configs import (
     DEFAULT_UNLABELED_LABEL_COMPLETION_METHOD,
     EXPERIMENT_DATASETS,
     EXPERIMENT_METHODS,
-    EXPERIMENT_MISSING_RATES,
     EXPERIMENT_SEEDS,
+    MISSING_RATES_BY_SCHEME,
     MISSINGNESS_SCHEMES,
 )
 from project1.experiments.runner import run_single_experiment
@@ -28,25 +28,26 @@ OUTPUT_DIR = PROJECT_ROOT / "outputs" / "tables"
 
 
 def build_experiment_grid():
-    """Return the full configured experiment grid as a list of configuration dictionaries."""
+    """Return the configured experiment grid, including an MCAR rate sweep."""
     grid = []
-    for dataset, scheme, method, seed, missing_rate in product(
+    for dataset, scheme, method, seed in product(
         EXPERIMENT_DATASETS,
         MISSINGNESS_SCHEMES,
         EXPERIMENT_METHODS,
         EXPERIMENT_SEEDS,
-        EXPERIMENT_MISSING_RATES,
     ):
-        config = {
-            "dataset": dataset,
-            "scheme": scheme,
-            "method": method,
-            "seed": seed,
-            "missing_rate": missing_rate,
-        }
-        if method == "unlabeled":
-            config["label_completion_method"] = DEFAULT_UNLABELED_LABEL_COMPLETION_METHOD
-        grid.append(config)
+        missing_rates = MISSING_RATES_BY_SCHEME[scheme]
+        for missing_rate in missing_rates:
+            config = {
+                "dataset": dataset,
+                "scheme": scheme,
+                "method": method,
+                "seed": seed,
+                "missing_rate": missing_rate,
+            }
+            if method == "unlabeled":
+                config["label_completion_method"] = DEFAULT_UNLABELED_LABEL_COMPLETION_METHOD
+            grid.append(config)
     return grid
 
 
