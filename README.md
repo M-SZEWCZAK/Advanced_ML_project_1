@@ -51,13 +51,13 @@ pip install -r requirements.txt
 Prepare a dataset using the local data pipeline:
 
 ```bash
-python scripts/prepare_datasets.py breast_cancer
+python3 scripts/prepare_datasets.py breast_cancer
 ```
 
 Run a single experiment:
 
 ```bash
-python scripts/run_single_experiment.py \
+python3 scripts/run_single_experiment.py \
   --dataset breast_cancer \
   --scheme mcar \
   --method naive \
@@ -69,7 +69,7 @@ python scripts/run_single_experiment.py \
 Run the full configured experiment grid:
 
 ```bash
-python scripts/run_all_experiments.py
+python3 scripts/run_all_experiments.py
 ```
 
 ## Experiments
