@@ -1,5 +1,6 @@
 """Own implementation of logistic lasso regression with FISTA."""
 
+import matplotlib.pyplot as plt
 import numpy as np
 
 from project1.metrics.classification import score_binary_classification
@@ -139,6 +140,96 @@ class FistaLogisticLassoRegressionClassifierFamily:
         """Return binary predictions for the best selected lambda."""
         positive_class_proba = self.predict_proba(X)[:, 1]
         return (positive_class_proba >= self.threshold).astype(int)
+
+    def plot(self, measure, X_validate, y_validate, lambdas=None, ax=None):
+        """Plot the validation metric as a function of lambda.
+
+        Parameters
+        ----------
+        measure : str
+            Validation metric name accepted by `validate`.
+        X_validate : array-like
+            Validation feature matrix used to score each fitted lambda.
+        y_validate : array-like
+            Validation labels corresponding to `X_validate`.
+        lambdas : array-like or None, default=None
+            Optional subset of lambda values to visualize. When omitted, all
+            fitted lambdas stored in the model are used.
+        ax : matplotlib.axes.Axes or None, default=None
+            Optional axis on which the plot should be drawn.
+
+        Returns
+        -------
+        tuple
+            `(figure, axis)` for the generated plot.
+        """
+        lambdas_to_plot = self.lambdas if lambdas is None else np.asarray(lambdas, dtype=float)
+        metric_values = [self.validate(X_validate, y_validate, lambda_=lambda_, measure=measure) for lambda_ in lambdas_to_plot]
+
+        if ax is None:
+            figure, axis = plt.subplots()
+        else:
+            axis = ax
+            figure = axis.figure
+
+        axis.plot(lambdas_to_plot, metric_values, marker="o")
+        axis.set_xscale("log")
+        axis.set_xlabel("lambda")
+        axis.set_ylabel(measure)
+        axis.set_title(f"Validation {measure} across lambda values")
+        axis.grid(True, alpha=0.3)
+
+        return figure, axis
+
+    def plot_coefficients(self, lambdas=None, coefficient_indices=None, ax=None):
+        """Plot fitted coefficient values as a function of lambda.
+
+        Parameters
+        ----------
+        lambdas : array-like or None, default=None
+            Optional subset of lambda values to visualize. When omitted, all
+            fitted lambdas stored in the model are used.
+        coefficient_indices : array-like or None, default=None
+            Optional coefficient indices to plot. When omitted, all available
+            coefficients, including the intercept when present, are shown.
+        ax : matplotlib.axes.Axes or None, default=None
+            Optional axis on which the plot should be drawn.
+
+        Returns
+        -------
+        tuple
+            `(figure, axis)` for the generated plot.
+        """
+        lambdas_to_plot = self.lambdas if lambdas is None else np.asarray(lambdas, dtype=float)
+        coefficient_matrix = np.vstack([self._get_weights_for_lambda(lambda_) for lambda_ in lambdas_to_plot])
+
+        if coefficient_indices is None:
+            coefficient_indices = np.arange(coefficient_matrix.shape[1])
+        else:
+            coefficient_indices = np.asarray(coefficient_indices, dtype=int)
+
+        if ax is None:
+            figure, axis = plt.subplots()
+        else:
+            axis = ax
+            figure = axis.figure
+
+        for coefficient_index in coefficient_indices:
+            axis.plot(
+                lambdas_to_plot,
+                coefficient_matrix[:, coefficient_index],
+                marker="o",
+                label=f"coef_{coefficient_index}",
+            )
+
+        axis.set_xscale("log")
+        axis.set_xlabel("lambda")
+        axis.set_ylabel("coefficient value")
+        axis.set_title("Coefficient paths across lambda values")
+        axis.grid(True, alpha=0.3)
+        axis.legend()
+
+        return figure, axis
 
 
 __all__ = ["LassoAuxiliary", "FistaLogisticLassoRegressionClassifierFamily"]
