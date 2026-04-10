@@ -11,10 +11,13 @@ DEFAULT_RESULT_COLUMNS = [
     "method",
     "seed",
     "missing_rate",
+    "status",
     "accuracy",
     "balanced_accuracy",
     "f1",
     "roc_auc",
+    "error_type",
+    "error_message",
 ]
 
 DEFAULT_METRIC_COLUMNS = [
@@ -47,7 +50,7 @@ def save_results_to_csv(results, output_path, columns=None, index=False):
 
 
 def aggregate_results(results, groupby_columns=None, metric_columns=None):
-    """Aggregate experiment results by groups using mean and standard deviation for metrics."""
+    """Aggregate successful experiment results by groups using mean and standard deviation for metrics."""
     result_df = results_to_dataframe(results)
 
     if groupby_columns is None:
@@ -55,13 +58,20 @@ def aggregate_results(results, groupby_columns=None, metric_columns=None):
     if metric_columns is None:
         metric_columns = DEFAULT_METRIC_COLUMNS
 
+    if "status" in result_df.columns:
+        result_df = result_df[result_df["status"] != "error"].copy()
+
+    for column in metric_columns:
+        if column not in result_df.columns:
+            result_df[column] = pd.NA
+
+    if result_df.empty:
+        metric_stat_columns = [f"{metric}_{stat}" for metric in metric_columns for stat in ("mean", "std")]
+        return pd.DataFrame(columns=[*groupby_columns, *metric_stat_columns])
+
     missing_columns = [column for column in groupby_columns if column not in result_df.columns]
     if missing_columns:
         raise ValueError(f"Missing groupby columns in results: {missing_columns}")
-
-    missing_metric_columns = [column for column in metric_columns if column not in result_df.columns]
-    if missing_metric_columns:
-        raise ValueError(f"Missing metric columns in results: {missing_metric_columns}")
 
     aggregated_df = (
         result_df.groupby(groupby_columns, dropna=False)[metric_columns]

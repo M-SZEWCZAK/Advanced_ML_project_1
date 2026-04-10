@@ -23,6 +23,10 @@ EXPERIMENT_METHODS = [
     "unlabeled",
 ]
 
+# Fixed label-completion strategy used by the full experiment runner for the
+# initial unlabeled baseline sweep.
+DEFAULT_UNLABELED_LABEL_COMPLETION_METHOD = "logistic"
+
 # Random seeds used to repeat experiments across different train/test splits
 # and missing-label realizations.
 EXPERIMENT_SEEDS = [
@@ -57,6 +61,7 @@ __all__ = [
     "EXPERIMENT_DATASETS",
     "MISSINGNESS_SCHEMES",
     "EXPERIMENT_METHODS",
+    "DEFAULT_UNLABELED_LABEL_COMPLETION_METHOD",
     "EXPERIMENT_SEEDS",
     "EXPERIMENT_MISSING_RATES",
     "MCAR_ANALYSIS_MISSING_RATES",

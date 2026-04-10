@@ -11,6 +11,8 @@ class _BaseLogReg:
         self.random_state = random_state
         self.logreg_kwargs = logreg_kwargs
         self.model_ = None
+        self.is_constant_predictor_ = False
+        self.constant_class_ = None
 
     @staticmethod
     def _to_numpy_features(X):
@@ -39,18 +41,26 @@ class _BaseLogReg:
 
     def _ensure_is_fitted(self):
         """Ensure that the sklearn backend has already been fitted."""
-        if self.model_ is None:
+        if self.model_ is None and not self.is_constant_predictor_:
             raise ValueError("Model is not fitted yet. Call fit before prediction.")
 
     def predict(self, X):
         """Predict binary labels for the provided feature matrix."""
         self._ensure_is_fitted()
-        return self.model_.predict(self._to_numpy_features(X))
+        X_array = self._to_numpy_features(X)
+        if self.is_constant_predictor_:
+            return np.full(X_array.shape[0], self.constant_class_, dtype=int)
+        return self.model_.predict(X_array)
 
     def predict_proba(self, X):
         """Predict class probabilities for the provided feature matrix."""
         self._ensure_is_fitted()
-        return self.model_.predict_proba(self._to_numpy_features(X))
+        X_array = self._to_numpy_features(X)
+        if self.is_constant_predictor_:
+            positive_class_proba = float(self.constant_class_)
+            negative_class_proba = 1.0 - positive_class_proba
+            return np.tile([negative_class_proba, positive_class_proba], (X_array.shape[0], 1))
+        return self.model_.predict_proba(X_array)
 
 
 class NaiveLogReg(_BaseLogReg):
@@ -70,9 +80,17 @@ class NaiveLogReg(_BaseLogReg):
 
         X_observed = X_array[observed_mask]
         y_observed = y_array[observed_mask].astype(int)
+        unique_classes = np.unique(y_observed)
 
-        if len(np.unique(y_observed)) < 2:
-            raise ValueError("NaiveLogReg requires at least two observed classes to fit LogisticRegression.")
+        self.model_ = None
+        self.is_constant_predictor_ = False
+        self.constant_class_ = None
+
+        if len(unique_classes) < 2:
+            # Fallback for degenerate observed-label subsets: predict the only available class.
+            self.is_constant_predictor_ = True
+            self.constant_class_ = int(unique_classes[0])
+            return self
 
         self.model_ = self._make_model()
         self.model_.fit(X_observed, y_observed)
