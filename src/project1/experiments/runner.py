@@ -93,6 +93,7 @@ def run_single_experiment(
         Random seed used in splitting, missingness, and model initialization.
     label_completion_method : str, default="logistic"
         Imputation strategy passed to `UnlabeledLogReg` when `method="unlabeled"`.
+        For other methods the value is ignored and stored as `None` in results.
     test_size : float, default=0.2
         Fraction of data assigned to the test split.
     valid_size : float, default=0.2
@@ -111,13 +112,14 @@ def run_single_experiment(
     """
     scheme = scheme.lower()
     method = method.lower()
+    if label_completion_method is None:
+        label_completion_method = "logistic"
     label_completion_method = label_completion_method.lower()
-
-    if method != "unlabeled" and label_completion_method != "logistic":
-        raise ValueError("label_completion_method is only applicable when method='unlabeled'.")
 
     if label_completion_method not in {"logistic", "knn", "prior"}:
         raise ValueError("label_completion_method must be one of: logistic, knn, prior.")
+
+    effective_label_completion_method = label_completion_method if method == "unlabeled" else None
 
     missingness_kwargs = {} if missingness_kwargs is None else dict(missingness_kwargs)
     model_kwargs = {} if model_kwargs is None else dict(model_kwargs)
@@ -176,6 +178,7 @@ def run_single_experiment(
         "dataset": dataset,
         "scheme": scheme,
         "method": method,
+        "label_completion_method": effective_label_completion_method,
         "seed": seed,
         "missing_rate": missing_rate,
         "accuracy": metrics["accuracy"],
@@ -189,8 +192,6 @@ def run_single_experiment(
         "n_features_after_preprocessing": int(len(prepared.feature_names)),
         "observed_label_fraction_train": observed_fraction,
     }
-    if method == "unlabeled":
-        result["label_completion_method"] = label_completion_method
 
     return result
 

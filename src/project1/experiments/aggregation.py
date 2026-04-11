@@ -9,6 +9,7 @@ DEFAULT_RESULT_COLUMNS = [
     "dataset",
     "scheme",
     "method",
+    "label_completion_method",
     "seed",
     "missing_rate",
     "status",
@@ -54,12 +55,15 @@ def aggregate_results(results, groupby_columns=None, metric_columns=None):
     result_df = results_to_dataframe(results)
 
     if groupby_columns is None:
-        groupby_columns = ["dataset", "scheme", "method", "missing_rate"]
+        groupby_columns = ["dataset", "scheme", "method", "label_completion_method", "missing_rate"]
     if metric_columns is None:
         metric_columns = DEFAULT_METRIC_COLUMNS
 
     if "status" in result_df.columns:
         result_df = result_df[result_df["status"] != "error"].copy()
+
+    if "label_completion_method" not in result_df.columns:
+        result_df["label_completion_method"] = pd.NA
 
     for column in metric_columns:
         if column not in result_df.columns:

@@ -23,9 +23,16 @@ EXPERIMENT_METHODS = [
     "unlabeled",
 ]
 
-# Fixed label-completion strategy used by the full experiment runner for the
-# initial unlabeled baseline sweep.
-DEFAULT_UNLABELED_LABEL_COMPLETION_METHOD = "logistic"
+# Label-completion strategies evaluated for the unlabeled method in the full
+# experiment runner.
+UNLABELED_LABEL_COMPLETION_METHODS = [
+    "logistic",
+    "knn",
+]
+
+# Default label-completion strategy used when a single unlabeled experiment is
+# launched without overriding the completion method explicitly.
+DEFAULT_UNLABELED_LABEL_COMPLETION_METHOD = UNLABELED_LABEL_COMPLETION_METHODS[0]
 
 # Random seeds used to repeat experiments across different train/test splits
 # and missing-label realizations.
@@ -74,6 +81,7 @@ __all__ = [
     "EXPERIMENT_DATASETS",
     "MISSINGNESS_SCHEMES",
     "EXPERIMENT_METHODS",
+    "UNLABELED_LABEL_COMPLETION_METHODS",
     "DEFAULT_UNLABELED_LABEL_COMPLETION_METHOD",
     "EXPERIMENT_SEEDS",
     "EXPERIMENT_MISSING_RATES",

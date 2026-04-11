@@ -36,7 +36,7 @@ def parse_args():
         "--label-completion-method",
         default="logistic",
         choices=["logistic", "knn", "prior"],
-        help="Label-completion method used only when --method unlabeled.",
+        help="Label-completion method used when --method unlabeled.",
     )
     return parser.parse_args()
 

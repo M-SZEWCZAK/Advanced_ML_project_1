@@ -14,12 +14,12 @@ if str(SRC_PATH) not in sys.path:
 
 from project1.experiments.aggregation import aggregate_results, save_results_to_csv
 from project1.experiments.configs import (
-    DEFAULT_UNLABELED_LABEL_COMPLETION_METHOD,
     EXPERIMENT_DATASETS,
     EXPERIMENT_METHODS,
     EXPERIMENT_SEEDS,
     MISSING_RATES_BY_SCHEME,
     MISSINGNESS_SCHEMES,
+    UNLABELED_LABEL_COMPLETION_METHODS,
 )
 from project1.experiments.runner import run_single_experiment
 
@@ -28,7 +28,7 @@ OUTPUT_DIR = PROJECT_ROOT / "outputs" / "tables"
 
 
 def build_experiment_grid():
-    """Return the configured experiment grid, including an MCAR rate sweep."""
+    """Return the configured experiment grid, including unlabeled completion variants."""
     grid = []
     for dataset, scheme, method, seed in product(
         EXPERIMENT_DATASETS,
@@ -38,16 +38,29 @@ def build_experiment_grid():
     ):
         missing_rates = MISSING_RATES_BY_SCHEME[scheme]
         for missing_rate in missing_rates:
-            config = {
-                "dataset": dataset,
-                "scheme": scheme,
-                "method": method,
-                "seed": seed,
-                "missing_rate": missing_rate,
-            }
             if method == "unlabeled":
-                config["label_completion_method"] = DEFAULT_UNLABELED_LABEL_COMPLETION_METHOD
-            grid.append(config)
+                for label_completion_method in UNLABELED_LABEL_COMPLETION_METHODS:
+                    grid.append(
+                        {
+                            "dataset": dataset,
+                            "scheme": scheme,
+                            "method": method,
+                            "seed": seed,
+                            "missing_rate": missing_rate,
+                            "label_completion_method": label_completion_method,
+                        }
+                    )
+            else:
+                grid.append(
+                    {
+                        "dataset": dataset,
+                        "scheme": scheme,
+                        "method": method,
+                        "seed": seed,
+                        "missing_rate": missing_rate,
+                        "label_completion_method": None,
+                    }
+                )
     return grid
 
 
@@ -57,6 +70,7 @@ def build_error_result(config, exc):
         "dataset": config["dataset"],
         "scheme": config["scheme"],
         "method": config["method"],
+        "label_completion_method": config.get("label_completion_method"),
         "seed": config["seed"],
         "missing_rate": config["missing_rate"],
         "accuracy": np.nan,
@@ -67,8 +81,6 @@ def build_error_result(config, exc):
         "error_type": type(exc).__name__,
         "error_message": str(exc),
     }
-    if "label_completion_method" in config:
-        error_record["label_completion_method"] = config["label_completion_method"]
     return error_record
 
 
