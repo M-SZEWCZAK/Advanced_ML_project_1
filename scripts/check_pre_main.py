@@ -33,13 +33,40 @@ def read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
-def find_latest_results_csv() -> Path | None:
+def _find_preferred_output_file(final_path: str, compatibility_pattern: str) -> Path | None:
+    """Return the preferred final output file, with a compatibility fallback.
+
+    The checker treats the stable final filenames as the primary source of truth:
+    `final_results.csv` and `final_summary.csv`. If such a file is missing, it
+    falls back to the newest timestamped compatibility file matching the legacy
+    `all_experiments_*` naming scheme.
+    """
+    preferred_path = ROOT / final_path
+    if preferred_path.exists():
+        return preferred_path
+
     candidates = sorted(
-        glob.glob("outputs/tables/all_experiments_results_*.csv"),
+        glob.glob(compatibility_pattern),
         key=os.path.getmtime,
         reverse=True,
     )
     return Path(candidates[0]) if candidates else None
+
+
+def find_results_csv() -> Path | None:
+    """Find the final results CSV, with fallback to legacy timestamped files."""
+    return _find_preferred_output_file(
+        final_path="outputs/tables/final_results.csv",
+        compatibility_pattern="outputs/tables/all_experiments_results_*.csv",
+    )
+
+
+def find_summary_csv() -> Path | None:
+    """Find the final summary CSV, with fallback to legacy timestamped files."""
+    return _find_preferred_output_file(
+        final_path="outputs/tables/final_summary.csv",
+        compatibility_pattern="outputs/tables/all_experiments_summary_*.csv",
+    )
 
 
 def parse_python_file(path: Path) -> ast.AST | None:
@@ -149,9 +176,12 @@ def check_sklearn_comparison() -> bool:
 
 
 def check_results_csv() -> bool:
-    latest = find_latest_results_csv()
+    latest = find_results_csv()
     if latest is None:
-        fail("Nie znaleziono pliku outputs/tables/all_experiments_results_*.csv")
+        fail(
+            "Nie znaleziono pliku outputs/tables/final_results.csv "
+            "ani kompatybilnościowego outputs/tables/all_experiments_results_*.csv"
+        )
         return False
 
     print(f"[INFO] Analizuję najnowszy plik wynikowy: {latest.as_posix()}")
@@ -208,6 +238,42 @@ def check_results_csv() -> bool:
     return success
 
 
+def check_summary_csv() -> bool:
+    """Check whether the aggregated summary CSV is present and structurally valid."""
+    summary_path = find_summary_csv()
+    if summary_path is None:
+        fail(
+            "Nie znaleziono pliku outputs/tables/final_summary.csv "
+            "ani kompatybilnościowego outputs/tables/all_experiments_summary_*.csv"
+        )
+        return False
+
+    print(f"[INFO] Analizuję plik summary: {summary_path.as_posix()}")
+
+    df = pd.read_csv(summary_path)
+    needed_cols = {
+        "dataset",
+        "scheme",
+        "method",
+        "missing_rate",
+        "accuracy_mean",
+        "accuracy_std",
+        "balanced_accuracy_mean",
+        "balanced_accuracy_std",
+        "f1_mean",
+        "f1_std",
+        "roc_auc_mean",
+        "roc_auc_std",
+    }
+    missing_cols = needed_cols - set(df.columns)
+    if missing_cols:
+        fail(f"Brakuje kolumn w summary: {sorted(missing_cols)}")
+        return False
+
+    ok("Plik summary zawiera wymagane kolumny agregatów")
+    return True
+
+
 def main() -> None:
     print("=== CHECK PRE-MAIN START ===")
     results = {
@@ -215,6 +281,7 @@ def main() -> None:
         "unlabeled": check_unlabeled_methods(),
         "sklearn_comparison": check_sklearn_comparison(),
         "results_csv": check_results_csv(),
+        "summary_csv": check_summary_csv(),
     }
 
     print("\n=== PODSUMOWANIE ===")
