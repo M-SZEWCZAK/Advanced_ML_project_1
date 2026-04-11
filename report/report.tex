@@ -1,0 +1,59 @@
+\documentclass[12pt, a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+\usepackage{array}
+
+\usepackage{amsmath}
+
+\newcommand{\hardswish}{\operatorname{h-swish}}
+\newcommand{\relu}{\operatorname{ReLU}}
+\newcommand{\sigmoid}{\operatorname{\sigma}}
+
+\usepackage[backend=bibtex, style=ieee]{biblatex}
+%\addbibresource{bibliography.bib}
+
+\usepackage{caption}
+\usepackage{subcaption}
+
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{multirow}
+
+\title{
+    \textbf{Project I - Logistic regression} \\[0.5cm]
+    \large Advanced Machine Learning
+}
+\author{Igor Rudolf \and Michał Szewczak \and Sebastian Trojan}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\newpage
+\tableofcontents
+\newpage
+\section{Abstract}
+
+\section{FISTA logistic regression implementation}
+\subsection{Optimizer}
+The core of our logistic regression implementation is the optimizer which uses Fast Iterative Shrinkage-Thresholding Algorithm (FISTA) to learn the weights of the model by optmizing the function \begin{equation}
+     -\frac{1}{n} \sum_{i=1}^{n} \left[ y_i \ln(\sigma(\mathbf{x}_i^T \mathbf{w})) + (1 - y_i) \ln(1 - \sigma(\mathbf{x}_i^T \mathbf{w})) \right] + \lambda \sum_{j=1}^{p} |w_j|
+\end{equation}. An iterative method is needed because the Lasso penalty is not differentiable. The method is implemented as follows:
+\begin{itemize}
+    \item As the starting point we select vector of zeros.
+    \item To ensure that the method is  convergent, we estimate the Lipschitz constant $L$ of the gradient of the logistic loss function using the formula:
+    \begin{equation}
+        L = \frac{1}{4n} \|X\|_2^2
+    \end{equation}
+    where $n$ is the number of samples. This constant determines the step size $1/L$ used in the gradient descent phase.
+    \item
+\end{itemize}
+
+\subsection{Classifier}
+
+\end{document}
