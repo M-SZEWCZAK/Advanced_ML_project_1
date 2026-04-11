@@ -72,6 +72,19 @@ Run the full configured experiment grid:
 python3 scripts/run_all_experiments.py
 ```
 
+Run the pipeline on a new user-provided CSV dataset:
+
+```bash
+python3 scripts/run_custom_dataset.py \
+  --csv-path /path/to/your/data.csv \
+  --target-column target \
+  --scheme mcar \
+  --method unlabeled \
+  --missing-rate 0.2 \
+  --seed 42 \
+  --label-completion-method logistic
+```
+
 ## Experiments
 
 The experimental layer currently supports the following elements.
@@ -98,6 +111,7 @@ The experimental layer currently supports the following elements.
   - Trains on the full label vector and serves as a reference upper bound.
 - `unlabeled`
   - First completes missing labels in the training set, then trains the downstream classifier.
+  - The experiment pipeline currently runs at least two label-completion strategies for this method: `logistic` and `knn`.
 
 ## Outputs
 
@@ -109,11 +123,11 @@ The final result tables used in this project are:
 
 - `outputs/tables/final_results.csv`
   - The full experiment-level table.
-  - Each row corresponds to one concrete experiment configuration, including dataset, missingness scheme, method, seed, and missing rate.
+  - Each row corresponds to one concrete experiment configuration, including dataset, missingness scheme, method, seed, missing rate, and `label_completion_method`.
   - This file is intended for complete downstream analysis, filtering, debugging, and reproducibility checks.
 - `outputs/tables/final_summary.csv`
   - The aggregated summary table.
-  - Each row corresponds to a grouped experimental setting, with mean and standard deviation reported for the main evaluation metrics.
+  - Each row corresponds to a grouped experimental setting, including `label_completion_method` when relevant, with mean and standard deviation reported for the main evaluation metrics.
   - This file is intended to serve as the main source for the report, tables, and high-level comparisons between methods.
 
 The most important columns in `final_results.csv` include:
@@ -123,6 +137,7 @@ The most important columns in `final_results.csv` include:
 - `method`
 - `seed`
 - `missing_rate`
+- `label_completion_method`
 - `status`
 - `accuracy`
 - `balanced_accuracy`
@@ -134,6 +149,7 @@ The most important columns in `final_summary.csv` include:
 - `dataset`
 - `scheme`
 - `method`
+- `label_completion_method`
 - `missing_rate`
 - `accuracy_mean`, `accuracy_std`
 - `balanced_accuracy_mean`, `balanced_accuracy_std`
@@ -158,3 +174,4 @@ pytest tests/test_missingness.py tests/test_fista.py tests/test_unlabeled_logreg
 
 - The notebook in `notebooks/` is retained as auxiliary material only and should be treated as a reference artifact rather than the main execution path.
 - The principal project logic is implemented in `src/`, and all scripts are designed to rely on that modular codebase.
+- `scripts/run_custom_dataset.py` is the dedicated entry point for running the pipeline on a new external CSV dataset outside the predefined repository datasets.

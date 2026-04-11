@@ -13,6 +13,7 @@ Each row corresponds to one concrete configuration of:
 - dataset
 - missingness scheme
 - method
+- label-completion method
 - random seed
 - missing rate
 
@@ -23,6 +24,7 @@ The most important columns are:
 - `method`
 - `seed`
 - `missing_rate`
+- `label_completion_method`
 - `status`
 - `accuracy`
 - `balanced_accuracy`
@@ -34,7 +36,6 @@ The most important columns are:
 - `n_features_before_preprocessing`
 - `n_features_after_preprocessing`
 - `observed_label_fraction_train`
-- `label_completion_method`
 
 Use this file for:
 
@@ -52,6 +53,7 @@ Each row summarizes results grouped by:
 - `dataset`
 - `scheme`
 - `method`
+- `label_completion_method`
 - `missing_rate`
 
 The main columns are:
@@ -60,6 +62,7 @@ The main columns are:
 - `scheme`
 - `method`
 - `missing_rate`
+- `label_completion_method`
 - `accuracy_mean`
 - `accuracy_std`
 - `balanced_accuracy_mean`
@@ -79,4 +82,4 @@ Use this file for:
 ## Recommended Usage
 
 - `final_results.csv` is the primary file for complete analyses and traceability.
-- `final_summary.csv` is the primary file for the written report and presentation of aggregated results.
+- `final_summary.csv` is the primary file for the written report and presentation of aggregated results, including comparisons between `unlabeled` variants such as `logistic` and `knn`.
