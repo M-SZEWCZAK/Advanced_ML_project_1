@@ -9,7 +9,6 @@ import pandas as pd
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_INPUT_PATH = PROJECT_ROOT / "outputs" / "tables" / "final_results.csv"
-DEFAULT_SUMMARY_INPUT_PATH = PROJECT_ROOT / "outputs" / "tables" / "final_summary.csv"
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "outputs" / "plots"
 VALID_METRICS = ["accuracy", "balanced_accuracy", "f1", "roc_auc"]
 METHOD_ORDER = ["naive", "oracle", "unlabeled-logreg", "unlabeled-knn"]
@@ -21,12 +20,6 @@ def load_results(csv_path):
     df = pd.read_csv(csv_path)
     if "status" in df.columns:
         df = df[df["status"] == "ok"].copy()
-    return add_display_method_column(df)
-
-
-def load_summary(csv_path):
-    """Load aggregated experiment results and add display-method labels."""
-    df = pd.read_csv(csv_path)
     return add_display_method_column(df)
 
 
@@ -97,30 +90,6 @@ def _set_dynamic_metric_ylim(ax, values, lower_bound=0.0, upper_bound=1.0, paddi
     ax.set_ylim(ymin, ymax)
 
 
-def _get_metric_summary_columns(metric):
-    """Return mean and std column names for a summary metric."""
-    mean_column = f"{metric}_mean"
-    std_column = f"{metric}_std"
-    return mean_column, std_column
-
-
-def _split_oracle_reference(summary_df):
-    """Split a summary table into oracle and non-oracle subsets."""
-    oracle_df = summary_df[summary_df["display_method"] == "oracle"].copy()
-    non_oracle_df = summary_df[summary_df["display_method"] != "oracle"].copy()
-    return non_oracle_df, oracle_df
-
-
-def _get_oracle_reference_stats(oracle_df, mean_column, std_column):
-    """Return a single oracle reference mean/std from repeated summary rows."""
-    if oracle_df.empty:
-        return None, None
-
-    oracle_mean = float(oracle_df[mean_column].mean())
-    oracle_std = float(oracle_df[std_column].fillna(0.0).mean())
-    return oracle_mean, oracle_std
-
-
 def _get_oracle_raw_stats(oracle_df, metric):
     """Return raw oracle values and their mean from repeated result rows."""
     if oracle_df.empty:
@@ -133,45 +102,168 @@ def _get_oracle_raw_stats(oracle_df, metric):
     return oracle_values, float(oracle_values.mean())
 
 
-def _build_summary_lookup(summary_df, index_column, mean_column, std_column):
-    """Build lookup tables for grouped summary means and standard deviations."""
-    mean_lookup = {}
-    std_lookup = {}
+def _create_boxplot(ax, data, positions, color):
+    """Draw a boxplot with both median and mean markers shown."""
+    ax.boxplot(
+        data,
+        positions=positions,
+        widths=0.18,
+        patch_artist=True,
+        showmeans=True,
+        boxprops={"facecolor": color, "alpha": 0.45},
+        medianprops={"color": "black", "linewidth": 1.4},
+        meanprops={
+            "marker": "D",
+            "markerfacecolor": color,
+            "markeredgecolor": "black",
+            "markersize": 5,
+        },
+        whiskerprops={"color": color},
+        capprops={"color": color},
+        flierprops={"markerfacecolor": color, "markeredgecolor": color, "alpha": 0.5},
+    )
 
-    for _, row in summary_df.iterrows():
-        key = (row[index_column], row["display_method"])
-        mean_lookup[key] = row[mean_column]
-        std_lookup[key] = row[std_column]
 
-    return mean_lookup, std_lookup
+def _aggregate_mean_std(df, x_column, metric, methods):
+    """Aggregate raw results into mean/std tables for plotting."""
+    rows = []
+    for x_value in sorted(df[x_column].dropna().unique()):
+        for method in methods:
+            values = df[(df[x_column] == x_value) & (df["display_method"] == method)][metric].dropna()
+            if values.empty:
+                continue
+            rows.append(
+                {
+                    x_column: x_value,
+                    "display_method": method,
+                    "mean": float(values.mean()),
+                    "std": float(values.std(ddof=1)) if len(values) > 1 else 0.0,
+                }
+            )
+    return pd.DataFrame(rows)
 
 
-def _plot_difference_lines(ax, x_values, diff_map, title_methods, ylabel):
-    """Plot one line per method from a precomputed difference map."""
+def _compute_pairwise_differences(df, baseline_method, comparison_methods, metric, group_columns):
+    """Compute seed-level metric differences between methods inside each group."""
+    subset = df[group_columns + ["display_method", metric]].copy()
+    pivot = subset.pivot_table(
+        index=group_columns,
+        columns="display_method",
+        values=metric,
+        aggfunc="first",
+    ).reset_index()
+
+    rows = []
+    for method in comparison_methods:
+        if baseline_method not in pivot.columns or method not in pivot.columns:
+            continue
+        method_rows = pivot[group_columns].copy()
+        method_rows["display_method"] = method
+        method_rows["difference"] = pivot[method] - pivot[baseline_method]
+        rows.append(method_rows.dropna(subset=["difference"]))
+
+    if not rows:
+        return pd.DataFrame(columns=group_columns + ["display_method", "difference"])
+
+    return pd.concat(rows, ignore_index=True)
+
+
+def _compute_delta_to_oracle(df, metric, group_columns, methods):
+    """Compute seed-level oracle-minus-method deltas inside each group."""
+    subset = df[group_columns + ["display_method", metric]].copy()
+    pivot = subset.pivot_table(
+        index=group_columns,
+        columns="display_method",
+        values=metric,
+        aggfunc="first",
+    ).reset_index()
+
+    rows = []
+    for method in methods:
+        if "oracle" not in pivot.columns or method not in pivot.columns:
+            continue
+        method_rows = pivot[group_columns].copy()
+        method_rows["display_method"] = method
+        method_rows["difference"] = pivot["oracle"] - pivot[method]
+        rows.append(method_rows.dropna(subset=["difference"]))
+
+    if not rows:
+        return pd.DataFrame(columns=group_columns + ["display_method", "difference"])
+
+    return pd.concat(rows, ignore_index=True)
+
+
+def _plot_difference_line_from_raw(ax, diff_df, x_column, methods, ylabel):
+    """Plot mean differences with std shading from seed-level raw differences."""
     plotted_values = []
 
-    for method_index, method in enumerate(title_methods):
-        y_values = [diff_map.get((x, method)) for x in x_values]
-        if all(value is None or pd.isna(value) for value in y_values):
+    for method_index, method in enumerate(methods):
+        method_df = diff_df[diff_df["display_method"] == method].copy()
+        if method_df.empty:
             continue
+        summary = method_df.groupby(x_column)["difference"].agg(["mean", "std"]).reset_index()
+        x_values = summary[x_column].to_numpy()
+        mean_values = summary["mean"].to_numpy()
+        std_values = summary["std"].fillna(0.0).to_numpy()
+        color = f"C{method_index}"
 
-        clean_values = [float(value) if value is not None and not pd.isna(value) else float("nan") for value in y_values]
         ax.plot(
             x_values,
-            clean_values,
+            mean_values,
             marker="o",
             linewidth=2,
-            color=f"C{method_index}",
+            color=color,
             label=method,
         )
-        plotted_values.extend([value for value in clean_values if not pd.isna(value)])
+        ax.fill_between(
+            x_values,
+            mean_values - std_values,
+            mean_values + std_values,
+            alpha=0.15,
+            color=color,
+        )
+        plotted_values.extend(mean_values.tolist())
+        plotted_values.extend((mean_values - std_values).tolist())
+        plotted_values.extend((mean_values + std_values).tolist())
 
     ax.axhline(0.0, linestyle="--", linewidth=1.2, color="black", alpha=0.6)
     ax.set_ylabel(ylabel)
     return plotted_values
 
 
-def create_methods_boxplot(df, metric, missing_rate, dataset, output_path=None, show=False):
+def _plot_difference_boxplot_from_raw(ax, diff_df, x_values, x_column, methods, ylabel):
+    """Plot seed-level differences as grouped boxplots."""
+    base_positions = list(range(len(x_values)))
+    box_width = 0.22
+    plotted_values = []
+
+    for method_index, method in enumerate(methods):
+        method_data = []
+        positions = []
+        offset = (method_index - (len(methods) - 1) / 2) * box_width
+
+        for x_index, x_value in enumerate(x_values):
+            values = diff_df[
+                (diff_df[x_column] == x_value) & (diff_df["display_method"] == method)
+            ]["difference"].dropna()
+            if values.empty:
+                continue
+            method_data.append(values.to_numpy())
+            positions.append(base_positions[x_index] + offset)
+            plotted_values.extend(values.tolist())
+
+        if method_data:
+            _create_boxplot(ax, method_data, positions, f"C{method_index}")
+            ax.plot([], [], color=f"C{method_index}", linewidth=8, alpha=0.45, label=method)
+
+    ax.axhline(0.0, linestyle="--", linewidth=1.2, color="black", alpha=0.6)
+    ax.set_xticks(base_positions)
+    ax.set_xticklabels([str(value) for value in x_values])
+    ax.set_ylabel(ylabel)
+    return plotted_values
+
+
+def create_methods_boxplot(df, metric, dataset, output_path=None, show=False):
     """Create a grouped boxplot comparing methods across generating schemes.
 
     Parameters
@@ -180,8 +272,6 @@ def create_methods_boxplot(df, metric, missing_rate, dataset, output_path=None, 
         Raw experiment results.
     metric : str
         One of accuracy, balanced_accuracy, f1, roc_auc.
-    missing_rate : float
-        Missing-rate value used to filter rows.
     dataset : str
         Dataset name used to filter rows.
     output_path : Path or None, default=None
@@ -192,13 +282,11 @@ def create_methods_boxplot(df, metric, missing_rate, dataset, output_path=None, 
     _validate_metric(metric)
     filtered_df = df[
         (df["dataset"] == dataset)
-        & (df["missing_rate"] == missing_rate)
+        & (df["missing_rate"] == 0.3)
     ].copy()
 
     if filtered_df.empty:
-        raise ValueError(
-            f"No rows found for dataset={dataset!r} and missing_rate={missing_rate}."
-        )
+        raise ValueError(f"No rows found for dataset={dataset!r} and missing_rate=0.3.")
 
     oracle_df = filtered_df[filtered_df["display_method"] == "oracle"].copy()
     non_oracle_df = filtered_df[filtered_df["display_method"] != "oracle"].copy()
@@ -227,17 +315,7 @@ def create_methods_boxplot(df, metric, missing_rate, dataset, output_path=None, 
             positions.append(base_positions[scheme_index] + offset)
 
         if method_data:
-            ax.boxplot(
-                method_data,
-                positions=positions,
-                widths=box_width * 0.9,
-                patch_artist=True,
-                boxprops={"facecolor": f"C{method_index}", "alpha": 0.45},
-                medianprops={"color": "black"},
-                whiskerprops={"color": f"C{method_index}"},
-                capprops={"color": f"C{method_index}"},
-                flierprops={"markerfacecolor": f"C{method_index}", "markeredgecolor": f"C{method_index}", "alpha": 0.5},
-            )
+            _create_boxplot(ax, method_data, positions, f"C{method_index}")
             ax.plot([], [], color=f"C{method_index}", linewidth=8, alpha=0.45, label=method)
 
     if oracle_mean is not None:
@@ -247,21 +325,10 @@ def create_methods_boxplot(df, metric, missing_rate, dataset, output_path=None, 
             linestyle="--",
             linewidth=1.8,
             color="black",
-            alpha=0.8,
+            alpha=0.35,
             label="oracle mean",
         )
-        ax.boxplot(
-            [oracle_values.to_numpy()],
-            positions=[oracle_x],
-            widths=box_width * 1.2,
-            patch_artist=True,
-            boxprops={"facecolor": "white", "edgecolor": "black", "alpha": 0.8},
-            medianprops={"color": "black"},
-            whiskerprops={"color": "black"},
-            capprops={"color": "black"},
-            flierprops={"markerfacecolor": "black", "markeredgecolor": "black", "alpha": 0.5},
-        )
-        ax.plot([], [], color="black", linewidth=1.8, linestyle="--", label="oracle")
+        _create_boxplot(ax, [oracle_values.to_numpy()], [oracle_x], "#bdbdbd")
         ax.set_xlim(oracle_x - 0.6, max(base_positions) + 0.6)
         ax.set_xticks([oracle_x] + base_positions)
         ax.set_xticklabels(["oracle"] + schemes)
@@ -269,10 +336,10 @@ def create_methods_boxplot(df, metric, missing_rate, dataset, output_path=None, 
         ax.set_xticks(base_positions)
         ax.set_xticklabels(schemes)
 
-    ax.set_xlabel("Generating Method")
+    ax.set_xlabel("Missingness Schemes")
     ax.set_ylabel(metric.replace("_", " ").title())
     _set_dynamic_metric_ylim(ax, filtered_df[metric])
-    ax.set_title(f"{dataset}: {metric.replace('_', ' ').title()} by Scheme and Method (missing_rate={missing_rate})")
+    ax.set_title(f"{dataset}: {metric.replace('_', ' ').title()} by missingness scheme")
     ax.grid(axis="y", alpha=0.3)
     ax.legend(title="Method")
 
@@ -288,7 +355,7 @@ def create_methods_boxplot(df, metric, missing_rate, dataset, output_path=None, 
     return fig
 
 
-def create_missing_rate_comparison_plot(df, metric, dataset, generating_method, output_path=None, show=False):
+def create_missing_rate_comparison_plot(df, metric, dataset, output_path=None, show=False):
     """Create boxplots comparing methods across missing-rate values for one scheme.
 
     Parameters
@@ -299,8 +366,6 @@ def create_missing_rate_comparison_plot(df, metric, dataset, generating_method, 
         One of accuracy, balanced_accuracy, f1, roc_auc.
     dataset : str
         Dataset name used to filter rows.
-    generating_method : str
-        Missingness scheme, e.g. mcar, mar1, mar2, mnar.
     output_path : Path or None, default=None
         Optional destination for saving the figure.
     show : bool, default=False
@@ -309,13 +374,11 @@ def create_missing_rate_comparison_plot(df, metric, dataset, generating_method, 
     _validate_metric(metric)
     filtered_df = df[
         (df["dataset"] == dataset)
-        & (df["scheme"] == generating_method)
+        & (df["scheme"] == "mcar")
     ].copy()
 
     if filtered_df.empty:
-        raise ValueError(
-            f"No rows found for dataset={dataset!r} and generating_method={generating_method!r}."
-        )
+        raise ValueError(f"No rows found for dataset={dataset!r} and generating_method='mcar'.")
 
     oracle_df = filtered_df[filtered_df["display_method"] == "oracle"].copy()
     non_oracle_df = filtered_df[filtered_df["display_method"] != "oracle"].copy()
@@ -344,17 +407,7 @@ def create_missing_rate_comparison_plot(df, metric, dataset, generating_method, 
             positions.append(base_positions[rate_index] + offset)
 
         if method_data:
-            ax.boxplot(
-                method_data,
-                positions=positions,
-                widths=box_width * 0.9,
-                patch_artist=True,
-                boxprops={"facecolor": f"C{method_index}", "alpha": 0.45},
-                medianprops={"color": "black"},
-                whiskerprops={"color": f"C{method_index}"},
-                capprops={"color": f"C{method_index}"},
-                flierprops={"markerfacecolor": f"C{method_index}", "markeredgecolor": f"C{method_index}", "alpha": 0.5},
-            )
+            _create_boxplot(ax, method_data, positions, f"C{method_index}")
             ax.plot([], [], color=f"C{method_index}", linewidth=8, alpha=0.45, label=method)
 
     if oracle_mean is not None:
@@ -364,21 +417,10 @@ def create_missing_rate_comparison_plot(df, metric, dataset, generating_method, 
             linestyle="--",
             linewidth=1.8,
             color="black",
-            alpha=0.8,
+            alpha=0.35,
             label="oracle mean",
         )
-        ax.boxplot(
-            [oracle_values.to_numpy()],
-            positions=[oracle_x],
-            widths=box_width * 1.2,
-            patch_artist=True,
-            boxprops={"facecolor": "white", "edgecolor": "black", "alpha": 0.8},
-            medianprops={"color": "black"},
-            whiskerprops={"color": "black"},
-            capprops={"color": "black"},
-            flierprops={"markerfacecolor": "black", "markeredgecolor": "black", "alpha": 0.5},
-        )
-        ax.plot([], [], color="black", linewidth=1.8, linestyle="--", label="oracle")
+        _create_boxplot(ax, [oracle_values.to_numpy()], [oracle_x], "#bdbdbd")
         ax.set_xlim(oracle_x - 0.6, max(base_positions) + 0.6)
         ax.set_xticks([oracle_x] + base_positions)
         ax.set_xticklabels(["oracle"] + [str(rate) for rate in missing_rates])
@@ -389,7 +431,7 @@ def create_missing_rate_comparison_plot(df, metric, dataset, generating_method, 
     ax.set_xlabel("Missing Rate")
     ax.set_ylabel(metric.replace("_", " ").title())
     _set_dynamic_metric_ylim(ax, filtered_df[metric])
-    ax.set_title(f"{dataset}: {metric.replace('_', ' ').title()} by Missing Rate ({generating_method})")
+    ax.set_title(f"{dataset}: {metric.replace('_', ' ').title()} by MCAR missing rate")
     ax.grid(axis="y", alpha=0.3)
     ax.legend(title="Method")
 
@@ -405,117 +447,33 @@ def create_missing_rate_comparison_plot(df, metric, dataset, generating_method, 
     return fig
 
 
-def create_scheme_summary_plot(summary_df, metric, dataset, missing_rate=0.3, output_path=None, show=False):
-    """Create a report-friendly mean plot with error bars across schemes."""
+def create_mcar_trend_plot(df, metric, dataset, output_path=None, show=False):
+    """Create a trend plot across MCAR missing rates using raw results only."""
     _validate_metric(metric)
-    mean_column, std_column = _get_metric_summary_columns(metric)
-    filtered_df = summary_df[
-        (summary_df["dataset"] == dataset)
-        & (summary_df["missing_rate"] == missing_rate)
+    filtered_df = df[
+        (df["dataset"] == dataset)
+        & (df["scheme"] == "mcar")
     ].copy()
 
     if filtered_df.empty:
-        raise ValueError(
-            f"No summary rows found for dataset={dataset!r} and missing_rate={missing_rate}."
-        )
-
-    non_oracle_df, oracle_df = _split_oracle_reference(filtered_df)
-    schemes = _sort_categories(filtered_df["scheme"].unique(), SCHEME_ORDER)
-    methods = _sort_categories(non_oracle_df["display_method"].unique(), METHOD_ORDER)
-    oracle_mean, oracle_std = _get_oracle_reference_stats(oracle_df, mean_column, std_column)
-
-    fig, ax = plt.subplots(figsize=(10, 6))
-    x_positions = list(range(len(schemes)))
-
-    for method_index, method in enumerate(methods):
-        method_df = non_oracle_df[non_oracle_df["display_method"] == method].copy()
-        method_df["scheme"] = pd.Categorical(method_df["scheme"], categories=schemes, ordered=True)
-        method_df = method_df.sort_values("scheme")
-        ax.errorbar(
-            x_positions,
-            method_df[mean_column],
-            yerr=method_df[std_column],
-            marker="o",
-            linewidth=2,
-            capsize=4,
-            label=method,
-            color=f"C{method_index}",
-        )
-
-    if oracle_mean is not None:
-        oracle_x = -1
-        ax.axhline(
-            oracle_mean,
-            linestyle="--",
-            linewidth=1.8,
-            color="black",
-            alpha=0.8,
-            label="oracle mean",
-        )
-        ax.errorbar(
-            [oracle_x],
-            [oracle_mean],
-            yerr=[oracle_std],
-            marker="s",
-            markersize=7,
-            linestyle="None",
-            capsize=4,
-            color="black",
-            label="oracle",
-        )
-        ax.set_xlim(oracle_x - 0.6, max(x_positions) + 0.6)
-        ax.set_xticks([oracle_x] + x_positions)
-        ax.set_xticklabels(["oracle"] + schemes)
-    else:
-        ax.set_xticks(x_positions)
-        ax.set_xticklabels(schemes)
-
-    ax.set_xlabel("Missingness Scheme")
-    ax.set_ylabel(metric.replace("_", " ").title())
-    _set_dynamic_metric_ylim(ax, filtered_df[mean_column])
-    ax.set_title(
-        f"{dataset}: {metric.replace('_', ' ').title()} mean by scheme (missing_rate={missing_rate})"
-    )
-    ax.grid(axis="y", alpha=0.3)
-    ax.legend(title="Method")
-
-    if output_path is not None:
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        fig.savefig(output_path, dpi=200, bbox_inches="tight")
-
-    if show:
-        plt.show()
-    else:
-        plt.close(fig)
-
-    return fig
-
-
-def create_mcar_trend_plot(summary_df, metric, dataset, output_path=None, show=False):
-    """Create a trend plot across MCAR missing rates using summary means and std."""
-    _validate_metric(metric)
-    mean_column, std_column = _get_metric_summary_columns(metric)
-    filtered_df = summary_df[
-        (summary_df["dataset"] == dataset)
-        & (summary_df["scheme"] == "mcar")
-    ].copy()
-
-    if filtered_df.empty:
-        raise ValueError(f"No summary rows found for dataset={dataset!r} and scheme='mcar'.")
+        raise ValueError(f"No rows found for dataset={dataset!r} and scheme='mcar'.")
 
     missing_rates = sorted(filtered_df["missing_rate"].unique())
-    non_oracle_df, oracle_df = _split_oracle_reference(filtered_df)
+    oracle_df = filtered_df[filtered_df["display_method"] == "oracle"].copy()
+    non_oracle_df = filtered_df[filtered_df["display_method"] != "oracle"].copy()
     methods = _sort_categories(non_oracle_df["display_method"].unique(), METHOD_ORDER)
-    oracle_mean, oracle_std = _get_oracle_reference_stats(oracle_df, mean_column, std_column)
+    oracle_values, oracle_mean = _get_oracle_raw_stats(oracle_df, metric)
+    aggregated_df = _aggregate_mean_std(non_oracle_df, "missing_rate", metric, methods)
 
     fig, ax = plt.subplots(figsize=(10, 6))
+    plotted_values = []
 
     for method_index, method in enumerate(methods):
-        method_df = non_oracle_df[non_oracle_df["display_method"] == method].copy()
+        method_df = aggregated_df[aggregated_df["display_method"] == method].copy()
         method_df = method_df.sort_values("missing_rate")
         x_values = method_df["missing_rate"].to_numpy()
-        mean_values = method_df[mean_column].to_numpy()
-        std_values = method_df[std_column].fillna(0.0).to_numpy()
+        mean_values = method_df["mean"].to_numpy()
+        std_values = method_df["std"].fillna(0.0).to_numpy()
         color = f"C{method_index}"
 
         ax.plot(
@@ -533,6 +491,9 @@ def create_mcar_trend_plot(summary_df, metric, dataset, output_path=None, show=F
             alpha=0.15,
             color=color,
         )
+        plotted_values.extend(mean_values.tolist())
+        plotted_values.extend((mean_values - std_values).tolist())
+        plotted_values.extend((mean_values + std_values).tolist())
 
     if oracle_mean is not None:
         oracle_x = min(missing_rates) - 0.12
@@ -541,19 +502,18 @@ def create_mcar_trend_plot(summary_df, metric, dataset, output_path=None, show=F
             linestyle="--",
             linewidth=1.8,
             color="black",
-            alpha=0.8,
+            alpha=0.35,
             label="oracle mean",
         )
         ax.errorbar(
             [oracle_x],
             [oracle_mean],
-            yerr=[oracle_std],
+            yerr=[float(oracle_values.std(ddof=1)) if len(oracle_values) > 1 else 0.0],
             marker="s",
             markersize=7,
             linestyle="None",
             capsize=4,
             color="black",
-            label="oracle",
         )
         ax.set_xlim(oracle_x - 0.06, max(missing_rates) + 0.06)
         ax.set_xticks([oracle_x] + missing_rates)
@@ -562,10 +522,19 @@ def create_mcar_trend_plot(summary_df, metric, dataset, output_path=None, show=F
         ax.set_xticks(missing_rates)
         ax.set_xticklabels([str(rate) for rate in missing_rates])
 
-    ax.set_xlabel("MCAR missing_rate")
+    ax.set_xlabel("Missing Rate")
     ax.set_ylabel(metric.replace("_", " ").title())
-    _set_dynamic_metric_ylim(ax, filtered_df[mean_column])
-    ax.set_title(f"{dataset}: {metric.replace('_', ' ').title()} trend across MCAR missing_rate")
+    if oracle_mean is not None:
+        plotted_values.extend(oracle_values.tolist())
+    _set_dynamic_metric_ylim(
+        ax,
+        plotted_values,
+        lower_bound=0.0,
+        upper_bound=1.0,
+        padding_ratio=0.28,
+        min_span=0.10,
+    )
+    ax.set_title(f"{dataset}: {metric.replace('_', ' ').title()} trend across MCAR missing rate")
     ax.grid(axis="y", alpha=0.3)
     ax.legend(title="Method")
 
@@ -582,53 +551,45 @@ def create_mcar_trend_plot(summary_df, metric, dataset, output_path=None, show=F
 
 
 def create_unlabeled_improvement_over_naive_by_scheme_plot(
-    summary_df,
+    df,
     metric,
     dataset,
-    missing_rate=0.3,
     output_path=None,
     show=False,
 ):
-    """Plot unlabeled-method improvement over naive across schemes."""
+    """Plot seed-level unlabeled improvement over naive across schemes as boxplots."""
     _validate_metric(metric)
-    mean_column, std_column = _get_metric_summary_columns(metric)
-    filtered_df = summary_df[
-        (summary_df["dataset"] == dataset)
-        & (summary_df["missing_rate"] == missing_rate)
+    filtered_df = df[
+        (df["dataset"] == dataset)
+        & (df["missing_rate"] == 0.3)
     ].copy()
 
     if filtered_df.empty:
-        raise ValueError(
-            f"No summary rows found for dataset={dataset!r} and missing_rate={missing_rate}."
-        )
+        raise ValueError(f"No rows found for dataset={dataset!r} and missing_rate=0.3.")
 
     schemes = _sort_categories(filtered_df["scheme"].unique(), SCHEME_ORDER)
-    mean_lookup, _ = _build_summary_lookup(filtered_df, "scheme", mean_column, std_column)
     methods = [method for method in METHOD_ORDER if method.startswith("unlabeled-")]
-    diff_map = {}
-
-    for scheme in schemes:
-        naive_mean = mean_lookup.get((scheme, "naive"))
-        if naive_mean is None or pd.isna(naive_mean):
-            continue
-        for method in methods:
-            method_mean = mean_lookup.get((scheme, method))
-            if method_mean is None or pd.isna(method_mean):
-                continue
-            diff_map[(scheme, method)] = float(method_mean - naive_mean)
+    diff_df = _compute_pairwise_differences(
+        df=filtered_df,
+        baseline_method="naive",
+        comparison_methods=methods,
+        metric=metric,
+        group_columns=["scheme", "seed"],
+    )
 
     fig, ax = plt.subplots(figsize=(10, 6))
-    plotted_values = _plot_difference_lines(
+    plotted_values = _plot_difference_boxplot_from_raw(
         ax=ax,
+        diff_df=diff_df,
         x_values=schemes,
-        diff_map=diff_map,
-        title_methods=methods,
+        x_column="scheme",
+        methods=methods,
         ylabel=f"{metric.replace('_', ' ').title()} improvement over naive",
     )
     _set_dynamic_metric_ylim(ax, plotted_values, lower_bound=-1.0, upper_bound=1.0, min_span=0.02)
     ax.set_xlabel("Missingness Scheme")
     ax.set_title(
-        f"{dataset}: unlabeled improvement over naive by scheme (missing_rate={missing_rate})"
+        f"{dataset}: Unlabeled improvement over naive by missingness scheme"
     )
     ax.grid(axis="y", alpha=0.3)
     ax.legend(title="Method")
@@ -646,54 +607,99 @@ def create_unlabeled_improvement_over_naive_by_scheme_plot(
 
 
 def create_unlabeled_improvement_over_naive_by_missing_rate_plot(
-    summary_df,
+    df,
     metric,
     dataset,
-    generating_method="mcar",
     output_path=None,
     show=False,
 ):
-    """Plot unlabeled-method improvement over naive across missing rates."""
+    """Plot unlabeled-method improvement over naive across MCAR missing rates."""
     _validate_metric(metric)
-    mean_column, std_column = _get_metric_summary_columns(metric)
-    filtered_df = summary_df[
-        (summary_df["dataset"] == dataset)
-        & (summary_df["scheme"] == generating_method)
+    filtered_df = df[
+        (df["dataset"] == dataset)
+        & (df["scheme"] == "mcar")
     ].copy()
 
     if filtered_df.empty:
-        raise ValueError(
-            f"No summary rows found for dataset={dataset!r} and generating_method={generating_method!r}."
-        )
+        raise ValueError(f"No rows found for dataset={dataset!r} and scheme='mcar'.")
 
     missing_rates = sorted(filtered_df["missing_rate"].unique())
-    mean_lookup, _ = _build_summary_lookup(filtered_df, "missing_rate", mean_column, std_column)
     methods = [method for method in METHOD_ORDER if method.startswith("unlabeled-")]
-    diff_map = {}
-
-    for rate in missing_rates:
-        naive_mean = mean_lookup.get((rate, "naive"))
-        if naive_mean is None or pd.isna(naive_mean):
-            continue
-        for method in methods:
-            method_mean = mean_lookup.get((rate, method))
-            if method_mean is None or pd.isna(method_mean):
-                continue
-            diff_map[(rate, method)] = float(method_mean - naive_mean)
+    diff_df = _compute_pairwise_differences(
+        df=filtered_df,
+        baseline_method="naive",
+        comparison_methods=methods,
+        metric=metric,
+        group_columns=["missing_rate", "seed"],
+    )
 
     fig, ax = plt.subplots(figsize=(10, 6))
-    plotted_values = _plot_difference_lines(
+    plotted_values = _plot_difference_line_from_raw(
         ax=ax,
-        x_values=missing_rates,
-        diff_map=diff_map,
-        title_methods=methods,
+        diff_df=diff_df,
+        x_column="missing_rate",
+        methods=methods,
         ylabel=f"{metric.replace('_', ' ').title()} improvement over naive",
     )
     _set_dynamic_metric_ylim(ax, plotted_values, lower_bound=-1.0, upper_bound=1.0, min_span=0.02)
     ax.set_xlabel("Missing Rate")
     ax.set_title(
-        f"{dataset}: unlabeled improvement over naive by missing rate ({generating_method})"
+        f"{dataset}: Unlabeled improvement over naive by MCAR missing rate"
     )
+    ax.grid(axis="y", alpha=0.3)
+    ax.legend(title="Method")
+
+    if output_path is not None:
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(output_path, dpi=200, bbox_inches="tight")
+
+    if show:
+        plt.show()
+    else:
+        plt.close(fig)
+
+    return fig
+
+
+def create_unlabeled_improvement_over_naive_by_missing_rate_boxplot(
+    df,
+    metric,
+    dataset,
+    output_path=None,
+    show=False,
+):
+    """Plot seed-level unlabeled improvement over naive across MCAR missing rates as boxplots."""
+    _validate_metric(metric)
+    filtered_df = df[
+        (df["dataset"] == dataset)
+        & (df["scheme"] == "mcar")
+    ].copy()
+
+    if filtered_df.empty:
+        raise ValueError(f"No rows found for dataset={dataset!r} and scheme='mcar'.")
+
+    missing_rates = sorted(filtered_df["missing_rate"].unique())
+    methods = [method for method in METHOD_ORDER if method.startswith("unlabeled-")]
+    diff_df = _compute_pairwise_differences(
+        df=filtered_df,
+        baseline_method="naive",
+        comparison_methods=methods,
+        metric=metric,
+        group_columns=["missing_rate", "seed"],
+    )
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    plotted_values = _plot_difference_boxplot_from_raw(
+        ax=ax,
+        diff_df=diff_df,
+        x_values=missing_rates,
+        x_column="missing_rate",
+        methods=methods,
+        ylabel=f"{metric.replace('_', ' ').title()} improvement over naive",
+    )
+    _set_dynamic_metric_ylim(ax, plotted_values, lower_bound=-1.0, upper_bound=1.0, min_span=0.02)
+    ax.set_xlabel("Missing Rate")
+    ax.set_title(f"{dataset}: Unlabeled improvement over naive by MCAR missing rate")
     ax.grid(axis="y", alpha=0.3)
     ax.legend(title="Method")
 
@@ -710,52 +716,43 @@ def create_unlabeled_improvement_over_naive_by_missing_rate_plot(
 
 
 def create_delta_to_oracle_by_scheme_plot(
-    summary_df,
+    df,
     metric,
     dataset,
-    missing_rate=0.3,
     output_path=None,
     show=False,
 ):
-    """Plot method delta to oracle across schemes."""
+    """Plot seed-level delta to oracle across schemes as boxplots."""
     _validate_metric(metric)
-    mean_column, std_column = _get_metric_summary_columns(metric)
-    filtered_df = summary_df[
-        (summary_df["dataset"] == dataset)
-        & (summary_df["missing_rate"] == missing_rate)
+    filtered_df = df[
+        (df["dataset"] == dataset)
+        & (df["missing_rate"] == 0.3)
     ].copy()
 
     if filtered_df.empty:
-        raise ValueError(
-            f"No summary rows found for dataset={dataset!r} and missing_rate={missing_rate}."
-        )
+        raise ValueError(f"No rows found for dataset={dataset!r} and missing_rate=0.3.")
 
     schemes = _sort_categories(filtered_df["scheme"].unique(), SCHEME_ORDER)
-    mean_lookup, _ = _build_summary_lookup(filtered_df, "scheme", mean_column, std_column)
     methods = [method for method in METHOD_ORDER if method != "oracle"]
-    diff_map = {}
-
-    for scheme in schemes:
-        oracle_mean = mean_lookup.get((scheme, "oracle"))
-        if oracle_mean is None or pd.isna(oracle_mean):
-            continue
-        for method in methods:
-            method_mean = mean_lookup.get((scheme, method))
-            if method_mean is None or pd.isna(method_mean):
-                continue
-            diff_map[(scheme, method)] = float(oracle_mean - method_mean)
+    diff_df = _compute_delta_to_oracle(
+        df=filtered_df,
+        metric=metric,
+        group_columns=["scheme", "seed"],
+        methods=methods,
+    )
 
     fig, ax = plt.subplots(figsize=(10, 6))
-    plotted_values = _plot_difference_lines(
+    plotted_values = _plot_difference_boxplot_from_raw(
         ax=ax,
+        diff_df=diff_df,
         x_values=schemes,
-        diff_map=diff_map,
-        title_methods=methods,
+        x_column="scheme",
+        methods=methods,
         ylabel=f"Delta to oracle in {metric.replace('_', ' ').title()}",
     )
     _set_dynamic_metric_ylim(ax, plotted_values, lower_bound=-1.0, upper_bound=1.0, min_span=0.02)
     ax.set_xlabel("Missingness Scheme")
-    ax.set_title(f"{dataset}: delta to oracle by scheme (missing_rate={missing_rate})")
+    ax.set_title(f"{dataset}: Delta to oracle by missingness scheme")
     ax.grid(axis="y", alpha=0.3)
     ax.legend(title="Method")
 
@@ -772,52 +769,42 @@ def create_delta_to_oracle_by_scheme_plot(
 
 
 def create_delta_to_oracle_by_missing_rate_plot(
-    summary_df,
+    df,
     metric,
     dataset,
-    generating_method="mcar",
     output_path=None,
     show=False,
 ):
-    """Plot method delta to oracle across missing rates."""
+    """Plot method delta to oracle across MCAR missing rates."""
     _validate_metric(metric)
-    mean_column, std_column = _get_metric_summary_columns(metric)
-    filtered_df = summary_df[
-        (summary_df["dataset"] == dataset)
-        & (summary_df["scheme"] == generating_method)
+    filtered_df = df[
+        (df["dataset"] == dataset)
+        & (df["scheme"] == "mcar")
     ].copy()
 
     if filtered_df.empty:
-        raise ValueError(
-            f"No summary rows found for dataset={dataset!r} and generating_method={generating_method!r}."
-        )
+        raise ValueError(f"No rows found for dataset={dataset!r} and scheme='mcar'.")
 
     missing_rates = sorted(filtered_df["missing_rate"].unique())
-    mean_lookup, _ = _build_summary_lookup(filtered_df, "missing_rate", mean_column, std_column)
     methods = [method for method in METHOD_ORDER if method != "oracle"]
-    diff_map = {}
-
-    for rate in missing_rates:
-        oracle_mean = mean_lookup.get((rate, "oracle"))
-        if oracle_mean is None or pd.isna(oracle_mean):
-            continue
-        for method in methods:
-            method_mean = mean_lookup.get((rate, method))
-            if method_mean is None or pd.isna(method_mean):
-                continue
-            diff_map[(rate, method)] = float(oracle_mean - method_mean)
+    diff_df = _compute_delta_to_oracle(
+        df=filtered_df,
+        metric=metric,
+        group_columns=["missing_rate", "seed"],
+        methods=methods,
+    )
 
     fig, ax = plt.subplots(figsize=(10, 6))
-    plotted_values = _plot_difference_lines(
+    plotted_values = _plot_difference_line_from_raw(
         ax=ax,
-        x_values=missing_rates,
-        diff_map=diff_map,
-        title_methods=methods,
+        diff_df=diff_df,
+        x_column="missing_rate",
+        methods=methods,
         ylabel=f"Delta to oracle in {metric.replace('_', ' ').title()}",
     )
     _set_dynamic_metric_ylim(ax, plotted_values, lower_bound=-1.0, upper_bound=1.0, min_span=0.02)
     ax.set_xlabel("Missing Rate")
-    ax.set_title(f"{dataset}: delta to oracle by missing rate ({generating_method})")
+    ax.set_title(f"{dataset}: Delta to oracle by MCAR missing rate")
     ax.grid(axis="y", alpha=0.3)
     ax.legend(title="Method")
 
@@ -833,6 +820,135 @@ def create_delta_to_oracle_by_missing_rate_plot(
     return fig
 
 
+def create_delta_to_oracle_by_missing_rate_boxplot(
+    df,
+    metric,
+    dataset,
+    output_path=None,
+    show=False,
+):
+    """Plot seed-level delta to oracle across MCAR missing rates as boxplots."""
+    _validate_metric(metric)
+    filtered_df = df[
+        (df["dataset"] == dataset)
+        & (df["scheme"] == "mcar")
+    ].copy()
+
+    if filtered_df.empty:
+        raise ValueError(f"No rows found for dataset={dataset!r} and scheme='mcar'.")
+
+    missing_rates = sorted(filtered_df["missing_rate"].unique())
+    methods = [method for method in METHOD_ORDER if method != "oracle"]
+    diff_df = _compute_delta_to_oracle(
+        df=filtered_df,
+        metric=metric,
+        group_columns=["missing_rate", "seed"],
+        methods=methods,
+    )
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    plotted_values = _plot_difference_boxplot_from_raw(
+        ax=ax,
+        diff_df=diff_df,
+        x_values=missing_rates,
+        x_column="missing_rate",
+        methods=methods,
+        ylabel=f"Delta to oracle in {metric.replace('_', ' ').title()}",
+    )
+    _set_dynamic_metric_ylim(ax, plotted_values, lower_bound=-1.0, upper_bound=1.0, min_span=0.02)
+    ax.set_xlabel("Missing Rate")
+    ax.set_title(f"{dataset}: Delta to oracle by MCAR missing rate")
+    ax.grid(axis="y", alpha=0.3)
+    ax.legend(title="Method")
+
+    if output_path is not None:
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(output_path, dpi=200, bbox_inches="tight")
+
+    if show:
+        plt.show()
+    else:
+        plt.close(fig)
+
+    return fig
+
+def generate_all_boxplots(df, output_dir, show=False):
+    datasets = sorted(df["dataset"].dropna().unique())
+    metrics = VALID_METRICS
+
+    saved_paths = []
+
+    for dataset in datasets:
+        for metric in metrics:
+            print(f"Processing dataset={dataset}, metric={metric}")
+
+            base_dir = output_dir / dataset / metric
+
+            try:
+                path = base_dir / "methods_boxplot.png"
+                create_methods_boxplot(df, metric, dataset, path, show)
+                saved_paths.append(path)
+            except Exception as e:
+                print(f"[SKIP] methods-boxplot: {e}")
+
+            try:
+                path = base_dir / "missing_rate_boxplot.png"
+                create_missing_rate_comparison_plot(df, metric, dataset, path, show)
+                saved_paths.append(path)
+            except Exception as e:
+                print(f"[SKIP] missing-rate-boxplot: {e}")
+
+            try:
+                path = base_dir / "mcar_trend.png"
+                create_mcar_trend_plot(df, metric, dataset, path, show)
+                saved_paths.append(path)
+            except Exception as e:
+                print(f"[SKIP] mcar-trend: {e}")
+
+            try:
+                path = base_dir / "improvement_over_naive_scheme.png"
+                create_unlabeled_improvement_over_naive_by_scheme_plot(df, metric, dataset, path, show)
+                saved_paths.append(path)
+            except Exception as e:
+                print(f"[SKIP] improvement-over-naive-scheme: {e}")
+
+            try:
+                path = base_dir / "improvement_over_naive_missing_rate.png"
+                create_unlabeled_improvement_over_naive_by_missing_rate_plot(df, metric, dataset, path, show)
+                saved_paths.append(path)
+            except Exception as e:
+                print(f"[SKIP] improvement-over-naive-missing-rate: {e}")
+
+            try:
+                path = base_dir / "improvement_over_naive_missing_rate_boxplot.png"
+                create_unlabeled_improvement_over_naive_by_missing_rate_boxplot(df, metric, dataset, path, show)
+                saved_paths.append(path)
+            except Exception as e:
+                print(f"[SKIP] improvement-over-naive-missing-rate-boxplot: {e}")
+
+            try:
+                path = base_dir / "delta_to_oracle_scheme.png"
+                create_delta_to_oracle_by_scheme_plot(df, metric, dataset, path, show)
+                saved_paths.append(path)
+            except Exception as e:
+                print(f"[SKIP] delta-to-oracle-scheme: {e}")
+
+            try:
+                path = base_dir / "delta_to_oracle_missing_rate.png"
+                create_delta_to_oracle_by_missing_rate_plot(df, metric, dataset, path, show)
+                saved_paths.append(path)
+            except Exception as e:
+                print(f"[SKIP] delta-to-oracle-missing-rate: {e}")
+
+            try:
+                path = base_dir / "delta_to_oracle_missing_rate_boxplot.png"
+                create_delta_to_oracle_by_missing_rate_boxplot(df, metric, dataset, path, show)
+                saved_paths.append(path)
+            except Exception as e:
+                print(f"[SKIP] delta-to-oracle-missing-rate-boxplot: {e}")
+
+    return saved_paths
+
 def parse_args():
     """Parse CLI arguments for the plotting helper."""
     parser = argparse.ArgumentParser(description=__doc__)
@@ -841,12 +957,6 @@ def parse_args():
         type=Path,
         default=DEFAULT_INPUT_PATH,
         help="CSV file with raw experiment results.",
-    )
-    parser.add_argument(
-        "--summary-input",
-        type=Path,
-        default=DEFAULT_SUMMARY_INPUT_PATH,
-        help="CSV file with aggregated experiment results.",
     )
     parser.add_argument(
         "--output-dir",
@@ -859,39 +969,33 @@ def parse_args():
         choices=[
             "methods-boxplot",
             "missing-rate-boxplot",
-            "scheme-summary",
             "mcar-trend",
             "improvement-over-naive-scheme",
             "improvement-over-naive-missing-rate",
+            "improvement-over-naive-missing-rate-boxplot",
             "delta-to-oracle-scheme",
             "delta-to-oracle-missing-rate",
+            "delta-to-oracle-missing-rate-boxplot",
             "both",
         ],
         default="both",
         help="Which plot type to create.",
     )
     parser.add_argument(
-        "--metric",
-        required=True,
-        choices=VALID_METRICS,
-        help="Metric used on the y-axis.",
+    "--metric",
+    choices=VALID_METRICS,
+    help="Metric used on the y-axis.",
     )
+
     parser.add_argument(
         "--dataset",
-        required=True,
         help="Dataset to plot.",
     )
+
     parser.add_argument(
-        "--missing-rate",
-        type=float,
-        default=None,
-        help="Missing-rate filter for the methods-boxplot.",
-    )
-    parser.add_argument(
-        "--generating-method",
-        choices=SCHEME_ORDER,
-        default=None,
-        help="Missingness scheme for the missing-rate-boxplot.",
+        "--all-boxplots",
+        action="store_true",
+        help="Generate all plots for all datasets and metrics.",
     )
     parser.add_argument(
         "--show",
@@ -905,19 +1009,33 @@ def main():
     """Create the requested plots and print the saved output paths."""
     args = parse_args()
     df = load_results(args.input)
-    summary_df = None
     saved_paths = []
 
+    if args.all_boxplots:
+        saved_paths = generate_all_boxplots(
+            df=df,
+            output_dir=args.output_dir,
+            show=args.show,
+        )
+
+        print("Saved plots:")
+        for path in saved_paths:
+            print(path)
+
+        return
+    
+    if args.metric is None or args.dataset is None:
+        raise ValueError(
+            "--metric and --dataset are required unless using --all-boxplots"
+        )
+    
     if args.plot_type in {"methods-boxplot", "both"}:
-        if args.missing_rate is None:
-            raise ValueError("--missing-rate is required for methods-boxplot.")
         methods_plot_path = args.output_dir / (
-            f"{args.dataset}_{args.metric}_methods_by_scheme_missing_rate_{args.missing_rate}.png"
+            f"{args.dataset}_{args.metric}_methods_by_scheme_missing_rate_0.3.png"
         )
         create_methods_boxplot(
             df=df,
             metric=args.metric,
-            missing_rate=args.missing_rate,
             dataset=args.dataset,
             output_path=methods_plot_path,
             show=args.show,
@@ -925,54 +1043,24 @@ def main():
         saved_paths.append(methods_plot_path)
 
     if args.plot_type in {"missing-rate-boxplot", "both"}:
-        if args.generating_method is None:
-            raise ValueError("--generating-method is required for missing-rate-boxplot.")
         rates_plot_path = args.output_dir / (
-            f"{args.dataset}_{args.metric}_missing_rate_comparison_{args.generating_method}.png"
+            f"{args.dataset}_{args.metric}_missing_rate_comparison_mcar.png"
         )
         create_missing_rate_comparison_plot(
             df=df,
             metric=args.metric,
             dataset=args.dataset,
-            generating_method=args.generating_method,
             output_path=rates_plot_path,
             show=args.show,
         )
         saved_paths.append(rates_plot_path)
-
-    if args.plot_type in {
-        "scheme-summary",
-        "mcar-trend",
-        "improvement-over-naive-scheme",
-        "improvement-over-naive-missing-rate",
-        "delta-to-oracle-scheme",
-        "delta-to-oracle-missing-rate",
-        "both",
-    }:
-        summary_df = load_summary(args.summary_input)
-
-    if args.plot_type in {"scheme-summary", "both"}:
-        if args.missing_rate is None:
-            raise ValueError("--missing-rate is required for scheme-summary.")
-        scheme_summary_path = args.output_dir / (
-            f"{args.dataset}_{args.metric}_scheme_summary_missing_rate_{args.missing_rate}.png"
-        )
-        create_scheme_summary_plot(
-            summary_df=summary_df,
-            metric=args.metric,
-            dataset=args.dataset,
-            missing_rate=args.missing_rate,
-            output_path=scheme_summary_path,
-            show=args.show,
-        )
-        saved_paths.append(scheme_summary_path)
 
     if args.plot_type in {"mcar-trend", "both"}:
         mcar_trend_path = args.output_dir / (
             f"{args.dataset}_{args.metric}_mcar_trend.png"
         )
         create_mcar_trend_plot(
-            summary_df=summary_df,
+            df=df,
             metric=args.metric,
             dataset=args.dataset,
             output_path=mcar_trend_path,
@@ -981,68 +1069,82 @@ def main():
         saved_paths.append(mcar_trend_path)
 
     if args.plot_type in {"improvement-over-naive-scheme", "both"}:
-        if args.missing_rate is None:
-            raise ValueError("--missing-rate is required for improvement-over-naive-scheme.")
         improvement_scheme_path = args.output_dir / (
-            f"{args.dataset}_{args.metric}_improvement_over_naive_by_scheme_missing_rate_{args.missing_rate}.png"
+            f"{args.dataset}_{args.metric}_improvement_over_naive_by_scheme.png"
         )
         create_unlabeled_improvement_over_naive_by_scheme_plot(
-            summary_df=summary_df,
+            df=df,
             metric=args.metric,
             dataset=args.dataset,
-            missing_rate=args.missing_rate,
             output_path=improvement_scheme_path,
             show=args.show,
         )
         saved_paths.append(improvement_scheme_path)
 
     if args.plot_type in {"improvement-over-naive-missing-rate", "both"}:
-        if args.generating_method is None:
-            raise ValueError("--generating-method is required for improvement-over-naive-missing-rate.")
         improvement_rate_path = args.output_dir / (
-            f"{args.dataset}_{args.metric}_improvement_over_naive_by_missing_rate_{args.generating_method}.png"
+            f"{args.dataset}_{args.metric}_improvement_over_naive_by_missing_rate_mcar.png"
         )
         create_unlabeled_improvement_over_naive_by_missing_rate_plot(
-            summary_df=summary_df,
+            df=df,
             metric=args.metric,
             dataset=args.dataset,
-            generating_method=args.generating_method,
             output_path=improvement_rate_path,
             show=args.show,
         )
         saved_paths.append(improvement_rate_path)
 
-    if args.plot_type in {"delta-to-oracle-scheme", "both"}:
-        if args.missing_rate is None:
-            raise ValueError("--missing-rate is required for delta-to-oracle-scheme.")
-        delta_scheme_path = args.output_dir / (
-            f"{args.dataset}_{args.metric}_delta_to_oracle_by_scheme_missing_rate_{args.missing_rate}.png"
+    if args.plot_type in {"improvement-over-naive-missing-rate-boxplot", "both"}:
+        improvement_rate_boxplot_path = args.output_dir / (
+            f"{args.dataset}_{args.metric}_improvement_over_naive_by_missing_rate_mcar_boxplot.png"
         )
-        create_delta_to_oracle_by_scheme_plot(
-            summary_df=summary_df,
+        create_unlabeled_improvement_over_naive_by_missing_rate_boxplot(
+            df=df,
             metric=args.metric,
             dataset=args.dataset,
-            missing_rate=args.missing_rate,
+            output_path=improvement_rate_boxplot_path,
+            show=args.show,
+        )
+        saved_paths.append(improvement_rate_boxplot_path)
+
+    if args.plot_type in {"delta-to-oracle-scheme", "both"}:
+        delta_scheme_path = args.output_dir / (
+            f"{args.dataset}_{args.metric}_delta_to_oracle_by_scheme.png"
+        )
+        create_delta_to_oracle_by_scheme_plot(
+            df=df,
+            metric=args.metric,
+            dataset=args.dataset,
             output_path=delta_scheme_path,
             show=args.show,
         )
         saved_paths.append(delta_scheme_path)
 
     if args.plot_type in {"delta-to-oracle-missing-rate", "both"}:
-        if args.generating_method is None:
-            raise ValueError("--generating-method is required for delta-to-oracle-missing-rate.")
         delta_rate_path = args.output_dir / (
-            f"{args.dataset}_{args.metric}_delta_to_oracle_by_missing_rate_{args.generating_method}.png"
+            f"{args.dataset}_{args.metric}_delta_to_oracle_by_missing_rate_mcar.png"
         )
         create_delta_to_oracle_by_missing_rate_plot(
-            summary_df=summary_df,
+            df=df,
             metric=args.metric,
             dataset=args.dataset,
-            generating_method=args.generating_method,
             output_path=delta_rate_path,
             show=args.show,
         )
         saved_paths.append(delta_rate_path)
+
+    if args.plot_type in {"delta-to-oracle-missing-rate-boxplot", "both"}:
+        delta_rate_boxplot_path = args.output_dir / (
+            f"{args.dataset}_{args.metric}_delta_to_oracle_by_missing_rate_mcar_boxplot.png"
+        )
+        create_delta_to_oracle_by_missing_rate_boxplot(
+            df=df,
+            metric=args.metric,
+            dataset=args.dataset,
+            output_path=delta_rate_boxplot_path,
+            show=args.show,
+        )
+        saved_paths.append(delta_rate_boxplot_path)
 
     print("Saved plots:")
     for path in saved_paths:
