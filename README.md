@@ -105,12 +105,40 @@ Experimental results are saved as CSV files in:
 
 - `outputs/tables/`
 
-Typical output files include:
+The final result tables used in this project are:
 
-- raw experiment tables, for example `all_experiments_results_<timestamp>.csv`
-- aggregated summaries, for example `all_experiments_summary_<timestamp>.csv`
+- `outputs/tables/final_results.csv`
+  - The full experiment-level table.
+  - Each row corresponds to one concrete experiment configuration, including dataset, missingness scheme, method, seed, and missing rate.
+  - This file is intended for complete downstream analysis, filtering, debugging, and reproducibility checks.
+- `outputs/tables/final_summary.csv`
+  - The aggregated summary table.
+  - Each row corresponds to a grouped experimental setting, with mean and standard deviation reported for the main evaluation metrics.
+  - This file is intended to serve as the main source for the report, tables, and high-level comparisons between methods.
 
-These files are intended to support later quantitative analysis and report preparation.
+The most important columns in `final_results.csv` include:
+
+- `dataset`
+- `scheme`
+- `method`
+- `seed`
+- `missing_rate`
+- `status`
+- `accuracy`
+- `balanced_accuracy`
+- `f1`
+- `roc_auc`
+
+The most important columns in `final_summary.csv` include:
+
+- `dataset`
+- `scheme`
+- `method`
+- `missing_rate`
+- `accuracy_mean`, `accuracy_std`
+- `balanced_accuracy_mean`, `balanced_accuracy_std`
+- `f1_mean`, `f1_std`
+- `roc_auc_mean`, `roc_auc_std`
 
 ## Testing
 
