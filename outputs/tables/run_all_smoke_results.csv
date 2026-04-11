@@ -1,3 +1,0 @@
-dataset,scheme,method,seed,missing_rate,accuracy,balanced_accuracy,f1,roc_auc,train_size,valid_size,test_size,n_features_before_preprocessing,n_features_after_preprocessing,observed_label_fraction_train
-breast_cancer,mcar,naive,42,0.1,0.9649122807017544,0.9573412698412699,0.9512195121951219,0.9940476190476191,341,114,114,30,25,0.8797653958944281
-breast_cancer,mcar,naive,42,0.2,0.956140350877193,0.9503968253968254,0.9397590361445783,0.9917328042328042,341,114,114,30,25,0.7771260997067448
