@@ -7,7 +7,7 @@
 \usepackage[T1]{fontenc}
 \usepackage[english]{babel}
 \usepackage{geometry}
-\geometry{margin=2.5cm}
+\geometry{margin=2.0cm}
 \usepackage{array}
 \usepackage{float}
 \usepackage{placeins}
@@ -116,10 +116,13 @@ For every run, we reported four performance measures: accuracy, balanced accurac
 
 Unless stated otherwise, the discussion in this section is based primarily on balanced accuracy, because it is the most suitable metric for comparing methods across datasets with potentially different class distributions. The same qualitative trends are generally consistent with accuracy, F1 score, and ROC AUC, although small differences in ranking may appear for individual settings, especially on the more variable datasets. The results should be interpreted separately for each dataset, since the four datasets differ substantially in difficulty and in their sensitivity to missing labels. Due to the limited length of the report, we present only the most important observations and a selected subset of the most informative plots, while the full set of aggregated results and other plots are available in the appendix.
 
+Two recurring plot types are used throughout this section and in the appendix. In plots labeled \emph{delta to Oracle}, the value shown for each method is the balanced-accuracy difference relative to the Oracle model, so a value of zero means equal performance to Oracle, positive values mean worse performance than Oracle, and negative values mean better performance than Oracle. In plots labeled \emph{improvement over Naive}, the value shown is the balanced-accuracy difference relative to the Naive baseline, so a value of zero means equal performance to Naive, positive values mean better performance than Naive, and negative values mean worse performance than Naive.
+
+
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.75\textwidth]{../outputs/plots/breast_cancer/balanced_accuracy/delta_to_oracle_scheme.png}
-    \caption{Difference in balanced accuracy to the Oracle model on the \texttt{breast\_cancer} dataset for the three non-MCAR missingness mechanisms at missing rate $0.3$. Smaller absolute gap to Oracle indicates stronger performance.}
+    \caption{Balanced-accuracy gap to Oracle on the \texttt{breast\_cancer} dataset across all schemes at missing rate $0.3$.}
     \label{fig:scheme-breast-cancer}
 \end{figure}
 
@@ -129,7 +132,7 @@ The \texttt{breast\_cancer} dataset is the most stable setting in the study. All
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.75\textwidth]{../outputs/plots/ionosphere/balanced_accuracy/improvement_over_naive_scheme.png}
-    \caption{Improvement in balanced accuracy over the Naive model on the \texttt{ionosphere} dataset across missingness mechanisms. Positive values indicate that label completion improves over direct fitting on the observed labels, while negative values indicate the opposite.}
+    \caption{Balanced-accuracy gain over Naive on the \texttt{ionosphere} dataset across all schemes.}
     \label{fig:scheme-ionosphere}
 \end{figure}
 
@@ -146,7 +149,7 @@ The \texttt{ionosphere} dataset is noticeably more sensitive to the missingness 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.75\textwidth]{../outputs/plots/madelon/balanced_accuracy/delta_to_oracle_scheme.png}
-    \caption{Difference in balanced accuracy to the Oracle model on the \texttt{madelon} dataset for \texttt{MAR1}, \texttt{MAR2}, and \texttt{MNAR} at missing rate $0.3$. The unlabeled methods substantially outperform both Oracle and Naive.}
+    \caption{Balanced-accuracy gap to Oracle on the \texttt{madelon} dataset across all schemes at missing rate $0.3$.}
     \label{fig:scheme-madelon}
 \end{figure}
 
@@ -163,7 +166,7 @@ The \texttt{madelon} dataset exhibits the most distinctive behavior in the entir
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.75\textwidth]{../outputs/plots/spambase/balanced_accuracy/delta_to_oracle_scheme.png}
-    \caption{Difference in balanced accuracy to the Oracle model on the \texttt{spambase} dataset for \texttt{MAR1}, \texttt{MAR2}, and \texttt{MNAR} at missing rate $0.3$.}
+    \caption{Balanced-accuracy gap to Oracle on the \texttt{spambase} dataset across all schemes at missing rate $0.3$.}
     \label{fig:scheme-spambase}
 \end{figure}
 
@@ -256,19 +259,19 @@ This appendix contains balanced-accuracy plots that were not included in the mai
 \subsection{Breast cancer}
 
 \balappendixplot{breast_cancer}{delta_to_oracle_missing_rate}
-{Balanced accuracy on the \texttt{breast\_cancer} dataset: difference to Oracle as a function of missing rate under \texttt{MCAR}.}
+{Balanced-accuracy gap to Oracle on the \texttt{breast\_cancer} dataset under \texttt{MCAR} as missing rate varies.}
 
 \balappendixplot{breast_cancer}{delta_to_oracle_missing_rate_boxplot}
-{Balanced accuracy on the \texttt{breast\_cancer} dataset: distribution of differences to Oracle across missing rates.}
+{Balanced-accuracy gap to Oracle on the \texttt{breast\_cancer} dataset across MCAR missing rates.}
 
 \balappendixplot{breast_cancer}{improvement_over_naive_missing_rate}
-{Balanced accuracy on the \texttt{breast\_cancer} dataset: improvement over Naive as a function of missing rate.}
+{Balanced-accuracy gain over Naive on the \texttt{breast\_cancer} dataset under \texttt{MCAR} as missing rate varies.}
 
 \balappendixplot{breast_cancer}{improvement_over_naive_missing_rate_boxplot}
-{Balanced accuracy on the \texttt{breast\_cancer} dataset: distribution of improvements over Naive across missing rates.}
+{Balanced-accuracy gain over Naive on the \texttt{breast\_cancer} dataset across MCAR missing rates.}
 
 \balappendixplot{breast_cancer}{improvement_over_naive_scheme}
-{Balanced accuracy on the \texttt{breast\_cancer} dataset: improvement over Naive across missingness schemes.}
+{Balanced-accuracy gain over Naive on the \texttt{breast\_cancer} dataset across all schemes.}
 
 \balappendixplot{breast_cancer}{mcar_trend}
 {Balanced accuracy on the \texttt{breast\_cancer} dataset under \texttt{MCAR} for different missing rates.}
@@ -283,22 +286,22 @@ This appendix contains balanced-accuracy plots that were not included in the mai
 \subsection{Ionosphere}
 
 \balappendixplot{ionosphere}{delta_to_oracle_missing_rate}
-{Balanced accuracy on the \texttt{ionosphere} dataset: difference to Oracle as a function of missing rate under \texttt{MCAR}.}
+{Balanced-accuracy gap to Oracle on the \texttt{ionosphere} dataset under \texttt{MCAR} as missing rate varies.}
 
 \balappendixplot{ionosphere}{delta_to_oracle_missing_rate_boxplot}
-{Balanced accuracy on the \texttt{ionosphere} dataset: distribution of differences to Oracle across missing rates.}
+{Balanced-accuracy gap to Oracle on the \texttt{ionosphere} dataset across MCAR missing rates.}
 
 \balappendixplot{ionosphere}{delta_to_oracle_scheme}
-{Balanced accuracy on the \texttt{ionosphere} dataset: difference to Oracle across missingness schemes.}
+{Balanced-accuracy gap to Oracle on the \texttt{ionosphere} dataset across all schemes.}
 
 \balappendixplot{ionosphere}{improvement_over_naive_missing_rate}
-{Balanced accuracy on the \texttt{ionosphere} dataset: improvement over Naive as a function of missing rate.}
+{Balanced-accuracy gain over Naive on the \texttt{ionosphere} dataset under \texttt{MCAR} as missing rate varies.}
 
 \balappendixplot{ionosphere}{improvement_over_naive_missing_rate_boxplot}
-{Balanced accuracy on the \texttt{ionosphere} dataset: distribution of improvements over Naive across missing rates.}
+{Balanced-accuracy gain over Naive on the \texttt{ionosphere} dataset across MCAR missing rates.}
 
 \balappendixplot{ionosphere}{improvement_over_naive_scheme}
-{Balanced accuracy on the \texttt{ionosphere} dataset: improvement over Naive across missingness schemes.}
+{Balanced-accuracy gain over Naive on the \texttt{ionosphere} dataset across all schemes.}
 
 \balappendixplot{ionosphere}{methods_boxplot}
 {Balanced accuracy on the \texttt{ionosphere} dataset: comparison of methods across experimental settings.}
@@ -310,19 +313,19 @@ This appendix contains balanced-accuracy plots that were not included in the mai
 \subsection{Madelon}
 
 \balappendixplot{madelon}{delta_to_oracle_missing_rate}
-{Balanced accuracy on the \texttt{madelon} dataset: difference to Oracle as a function of missing rate under \texttt{MCAR}.}
+{Balanced-accuracy gap to Oracle on the \texttt{madelon} dataset under \texttt{MCAR} as missing rate varies.}
 
 \balappendixplot{madelon}{delta_to_oracle_missing_rate_boxplot}
-{Balanced accuracy on the \texttt{madelon} dataset: distribution of differences to Oracle across missing rates.}
+{Balanced-accuracy gap to Oracle on the \texttt{madelon} dataset across MCAR missing rates.}
 
 \balappendixplot{madelon}{improvement_over_naive_missing_rate}
-{Balanced accuracy on the \texttt{madelon} dataset: improvement over Naive as a function of missing rate.}
+{Balanced-accuracy gain over Naive on the \texttt{madelon} dataset under \texttt{MCAR} as missing rate varies.}
 
 \balappendixplot{madelon}{improvement_over_naive_missing_rate_boxplot}
-{Balanced accuracy on the \texttt{madelon} dataset: distribution of improvements over Naive across missing rates.}
+{Balanced-accuracy gain over Naive on the \texttt{madelon} dataset across MCAR missing rates.}
 
 \balappendixplot{madelon}{improvement_over_naive_scheme}
-{Balanced accuracy on the \texttt{madelon} dataset: improvement over Naive across missingness schemes.}
+{Balanced-accuracy gain over Naive on the \texttt{madelon} dataset across all schemes.}
 
 \balappendixplot{madelon}{methods_boxplot}
 {Balanced accuracy on the \texttt{madelon} dataset: comparison of methods across experimental settings.}
@@ -334,19 +337,19 @@ This appendix contains balanced-accuracy plots that were not included in the mai
 \subsection{Spambase}
 
 \balappendixplot{spambase}{delta_to_oracle_missing_rate}
-{Balanced accuracy on the \texttt{spambase} dataset: difference to Oracle as a function of missing rate under \texttt{MCAR}.}
+{Balanced-accuracy gap to Oracle on the \texttt{spambase} dataset under \texttt{MCAR} as missing rate varies.}
 
 \balappendixplot{spambase}{delta_to_oracle_missing_rate_boxplot}
-{Balanced accuracy on the \texttt{spambase} dataset: distribution of differences to Oracle across missing rates.}
+{Balanced-accuracy gap to Oracle on the \texttt{spambase} dataset across MCAR missing rates.}
 
 \balappendixplot{spambase}{improvement_over_naive_missing_rate}
-{Balanced accuracy on the \texttt{spambase} dataset: improvement over Naive as a function of missing rate.}
+{Balanced-accuracy gain over Naive on the \texttt{spambase} dataset under \texttt{MCAR} as missing rate varies.}
 
 \balappendixplot{spambase}{improvement_over_naive_missing_rate_boxplot}
-{Balanced accuracy on the \texttt{spambase} dataset: distribution of improvements over Naive across missing rates.}
+{Balanced-accuracy gain over Naive on the \texttt{spambase} dataset across MCAR missing rates.}
 
 \balappendixplot{spambase}{improvement_over_naive_scheme}
-{Balanced accuracy on the \texttt{spambase} dataset: improvement over Naive across missingness schemes.}
+{Balanced-accuracy gain over Naive on the \texttt{spambase} dataset across all schemes.}
 
 \balappendixplot{spambase}{mcar_trend}
 {Balanced accuracy on the \texttt{spambase} dataset under \texttt{MCAR} for different missing rates.}
