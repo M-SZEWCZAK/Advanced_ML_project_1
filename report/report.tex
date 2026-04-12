@@ -1,4 +1,4 @@
-\documentclass[8pt, a4paper]{article}
+\documentclass[8pt,a4paper]{extarticle}
 
 \setcounter{tocdepth}{2}
 
@@ -14,14 +14,15 @@
 \usepackage{pdflscape}
 \usepackage{csvsimple}
 \usepackage{longtable}
-
-
+\usepackage{pgfmath}
+\usepackage{csquotes}
 
 \usepackage{amsmath}
 
 \newcommand{\hardswish}{\operatorname{h-swish}}
 \newcommand{\relu}{\operatorname{ReLU}}
 \newcommand{\sigmoid}{\operatorname{\sigma}}
+\newcommand{\tablevalue}[1]{\pgfmathprintnumber[fixed,precision=3]{#1}}
 
 \usepackage[backend=bibtex, style=ieee]{biblatex}
 \addbibresource{./bibliography.bib}
@@ -47,14 +48,25 @@
 \maketitle
 \newpage
 \begin{abstract}
+This report studies binary classification with partially missing training labels, focusing on logistic-regression-based approaches under different missingness mechanisms. We compare four methods: an Oracle model trained on complete labels, a Naive model trained only on observed labels, and two variants of \texttt{UnlabeledLogReg} that first complete missing labels using either logistic regression or $k$-nearest neighbours and then fit a FISTA-based logistic lasso classifier. Experiments are conducted on four benchmark datasets under four standard missingness settings: \texttt{MCAR}, \texttt{MAR1}, \texttt{MAR2}, and \texttt{MNAR}. Performance is evaluated using accuracy, balanced accuracy, F1 score, and ROC AUC across five random seeds.
 
+The results show that the effect of missing labels is strongly dataset-dependent and that no single practical method dominates in all settings. On easier datasets such as \texttt{breast\_cancer} and \texttt{spambase}, the Naive baseline remains highly competitive, especially under \texttt{MCAR}, \texttt{MAR1}, and \texttt{MAR2}. In contrast, logistic label completion becomes more beneficial in difficult settings, particularly under \texttt{MNAR}, where missingness depends on the label itself. The most distinctive behavior appears on \texttt{madelon}, where the unlabeled methods substantially outperform both baseline approaches. Overall, the study shows that both the missingness mechanism and the dataset structure play a crucial role in determining whether label completion is helpful.
 \end{abstract}
 \newpage
 \tableofcontents
 \newpage
 \section{Project Goal}
-This project investigates binary classification in the presence of missing labels, with a particular focus on logistic-regression-based methods and experimental comparison under controlled missingness mechanisms. In many practical settings, feature vectors are available for all observations, while class labels are observed only for a subset of the training data. This creates a learning problem in which standard supervised methods cannot be applied directly without additional assumptions or preprocessing.
+This project studies binary classification when part of the training labels are missing. In this setting, feature vectors are available for all observations, but class labels are observed only for a subset of the training data. As a result, standard supervised methods cannot be applied directly without either discarding unlabeled examples or introducing an additional mechanism for handling the missing labels.
+
+The main goal of the project is to evaluate whether recovering missing labels can improve downstream classification performance. To this end, we focus on logistic-regression-based methods and compare several approaches: an Oracle model trained on complete labels, a Naive model trained only on the observed subset, and unlabeled-learning variants that first complete missing labels and then fit the final classifier. The comparison is carried out under controlled missingness mechanisms, allowing us to assess not only which method performs best on average, but also under which datasets and missingness settings label completion is most beneficial.
 \section{Data Description}
+We conducted our experiments on the following datasets:
+\begin{itemize}
+    \item \textbf{Wisconsin Breast Cancer} -  dataset consists of 30 features computed from a digitized image of a fine needle aspirate (FNA) of a breast mass. The features describe characteristics of the cell nuclei present in the image, such as radius, texture, perimeter, and area, and are used to classify them as Malignant or Benign. The dataset has 569 instances. 
+    \item \textbf{Ionosphere} - Collected by a phased array of 16 high-frequency antennas in Goose Bay, Labrador, this dataset targets free electrons in the ionosphere, with 34 attributes in each record. "Good" radar returns show evidence of some type of structure in the ionosphere, while "Bad" returns do not. The dataset has 569 instances. 
+    \item \textbf{Spambase} - This dataset contains 57 features derived from emails to determine if they are "Spam" or "Non-Spam." Attributes include the frequency of specific words and characters, as well as statistics regarding sequences of capital letters. The dataset has 4601 instances. 
+    \item \textbf{Madelon}  Madelon is an artificial dataset created for the NIPS 2003 Feature Selection Challenge. It is a highly non-linear dataset with most (480 of 500) features being noise features. The dataset has 4400 instances.
+\end{itemize}
 \section{Missingness Generators}
 
 We implemented four missing-label generators corresponding to the standard settings \texttt{MCAR}, \texttt{MAR1}, \texttt{MAR2}, and \texttt{MNAR}. In all cases, the generator returns a partially observed training label vector in which missing labels are encoded as $-1$.
@@ -102,11 +114,11 @@ Each individual run followed the same sequence. First, the dataset was loaded an
 For every run, we reported four performance measures: accuracy, balanced accuracy, F1 score, and ROC AUC. To reduce the effect of randomness, each experiment was repeated five times using different random seeds: 42, 43, 44, 45, and 46. These seeds affected the data split and missing-label generation. The final conclusions were based on the aggregated results across these repeated runs.
 \section{Results Analysis}
 
-Unless stated otherwise, the discussion in this section is based primarily on balanced accuracy, because it is the most suitable metric for comparing methods across datasets with potentially different class distributions. The same qualitative trends are generally consistent with accuracy, F1 score, and ROC AUC, although small differences in ranking may appear for individual settings. The results should be interpreted separately for each dataset, since the four datasets differ substantially in difficulty and in their sensitivity to missing labels. Due to the limited length of the report, we present only the most important observations and a selected subset of the most informative plots, while the full set of aggregated results and other plots are available in the appendix.
+Unless stated otherwise, the discussion in this section is based primarily on balanced accuracy, because it is the most suitable metric for comparing methods across datasets with potentially different class distributions. The same qualitative trends are generally consistent with accuracy, F1 score, and ROC AUC, although small differences in ranking may appear for individual settings, especially on the more variable datasets. The results should be interpreted separately for each dataset, since the four datasets differ substantially in difficulty and in their sensitivity to missing labels. Due to the limited length of the report, we present only the most important observations and a selected subset of the most informative plots, while the full set of aggregated results and other plots are available in the appendix.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{../outputs/plots/breast_cancer/balanced_accuracy/delta_to_oracle_scheme.png}
+    \includegraphics[width=0.75\textwidth]{../outputs/plots/breast_cancer/balanced_accuracy/delta_to_oracle_scheme.png}
     \caption{Difference in balanced accuracy to the Oracle model on the \texttt{breast\_cancer} dataset for the three non-MCAR missingness mechanisms at missing rate $0.3$. Smaller absolute gap to Oracle indicates stronger performance.}
     \label{fig:scheme-breast-cancer}
 \end{figure}
@@ -116,24 +128,31 @@ The \texttt{breast\_cancer} dataset is the most stable setting in the study. All
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{../outputs/plots/ionosphere/balanced_accuracy/mcar_trend.png}
+    \includegraphics[width=0.75\textwidth]{../outputs/plots/ionosphere/balanced_accuracy/improvement_over_naive_scheme.png}
+    \caption{Improvement in balanced accuracy over the Naive model on the \texttt{ionosphere} dataset across missingness mechanisms. Positive values indicate that label completion improves over direct fitting on the observed labels, while negative values indicate the opposite.}
+    \label{fig:scheme-ionosphere}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{../outputs/plots/ionosphere/balanced_accuracy/mcar_trend.png}
     \caption{Balanced accuracy as a function of missing rate under \texttt{MCAR} for the \texttt{ionosphere} dataset. This figure illustrates the sensitivity of the methods to increasing proportions of missing training labels.}
     \label{fig:mcar-ionosphere}
 \end{figure}
 
 \paragraph{Ionosphere.}
-The \texttt{ionosphere} dataset is noticeably more sensitive to the missingness mechanism. There is no single non-Oracle method that dominates in all settings. For \texttt{MAR1}, the unlabeled method with kNN completion gives the best non-Oracle result, whereas for \texttt{MAR2}, the logistic-completion variant performs best. In contrast, under \texttt{MNAR}, the Naive model slightly outperforms both unlabeled variants in balanced accuracy. This instability suggests that the usefulness of label completion on this dataset depends strongly on whether the assumed completion mechanism matches the structure of the data. Figure~\ref{fig:mcar-ionosphere} also shows that under \texttt{MCAR} the performance of all non-Oracle methods deteriorates as the missing rate increases, with a particularly visible drop for the Naive and kNN-based approaches. Logistic completion is somewhat more stable, but it also degrades at higher missingness rates. Therefore, for \texttt{ionosphere}, the main message is not that one method is always best, but rather that the ranking itself depends strongly on the missingness scenario.
+The \texttt{ionosphere} dataset is noticeably more sensitive to the missingness mechanism. There is no single non-Oracle method that dominates in all settings. For \texttt{MAR1}, the unlabeled method with kNN completion gives the best non-Oracle result, whereas for \texttt{MAR2}, the logistic-completion variant has the best mean balanced accuracy, although its advantage over kNN is very small. In contrast, under \texttt{MNAR}, the Naive model slightly outperforms both unlabeled variants in balanced accuracy. As shown in Figure~\ref{fig:scheme-ionosphere}, the ranking of the practical methods changes across missingness mechanisms, which suggests that the usefulness of label completion on this dataset depends strongly on how well the completion strategy matches the structure of the data. Figure~\ref{fig:mcar-ionosphere} further shows that under \texttt{MCAR} the overall performance of the non-Oracle methods declines as the missing rate increases, although the trend is not perfectly monotone. The drop is particularly visible for the Naive and kNN-based approaches, while logistic completion is somewhat more stable at higher missingness rates. Therefore, for \texttt{ionosphere}, the main message is not that one method is always best, but rather that the ranking itself depends strongly on the missingness scenario.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{../outputs/plots/madelon/balanced_accuracy/delta_to_oracle_scheme.png}
+    \includegraphics[width=0.75\textwidth]{../outputs/plots/madelon/balanced_accuracy/delta_to_oracle_scheme.png}
     \caption{Difference in balanced accuracy to the Oracle model on the \texttt{madelon} dataset for \texttt{MAR1}, \texttt{MAR2}, and \texttt{MNAR} at missing rate $0.3$. The unlabeled methods substantially outperform both Oracle and Naive.}
     \label{fig:scheme-madelon}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{../outputs/plots/madelon/balanced_accuracy/mcar_trend.png}
+    \includegraphics[width=0.75\textwidth]{../outputs/plots/madelon/balanced_accuracy/mcar_trend.png}
     \caption{Balanced accuracy under \texttt{MCAR} on the \texttt{madelon} dataset as the missing rate increases from $0.1$ to $0.5$. The unlabeled methods remain strongest, while logistic completion degrades more gradually than kNN at higher missing rates.}
     \label{fig:mcar-madelon}
 \end{figure}
@@ -143,7 +162,7 @@ The \texttt{madelon} dataset exhibits the most distinctive behavior in the entir
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{../outputs/plots/spambase/balanced_accuracy/delta_to_oracle_scheme.png}
+    \includegraphics[width=0.75\textwidth]{../outputs/plots/spambase/balanced_accuracy/delta_to_oracle_scheme.png}
     \caption{Difference in balanced accuracy to the Oracle model on the \texttt{spambase} dataset for \texttt{MAR1}, \texttt{MAR2}, and \texttt{MNAR} at missing rate $0.3$.}
     \label{fig:scheme-spambase}
 \end{figure}
@@ -152,163 +171,190 @@ The \texttt{madelon} dataset exhibits the most distinctive behavior in the entir
 The \texttt{spambase} dataset is similar to \texttt{breast\_cancer} in the sense that the task is comparatively easy and the Naive baseline is already very strong. Figure~\ref{fig:scheme-spambase} shows that Oracle is best overall, but the gap between Oracle and Naive is small under \texttt{MAR1}, \texttt{MAR2}, and \texttt{MCAR}. In fact, among the practical methods, Naive is the strongest non-Oracle method in these easier settings. The unlabeled approaches do not improve performance there, which suggests that when the observed labels remain sufficiently informative, direct fitting on the observed subset is already adequate. The situation changes under \texttt{MNAR}, where logistic completion becomes the best non-Oracle approach and clearly outperforms kNN completion. This again supports the broader pattern that model-based completion is most helpful when missingness depends on the true label.
 
 \paragraph{Comparison across missingness mechanisms.}
-Across datasets, the most difficult setting is usually \texttt{MNAR}. This is particularly visible on \texttt{breast\_cancer} and \texttt{spambase}, where the Naive and kNN-based approaches lose more performance under \texttt{MNAR} than under \texttt{MAR1} or \texttt{MAR2}, while logistic completion remains relatively more competitive. The \texttt{MAR1} and \texttt{MAR2} settings are usually less harmful, although the exact ranking of methods still depends on the dataset. The results therefore indicate that the missingness mechanism is at least as important as the missingness rate itself.
+Across datasets, \texttt{MNAR} is often among the most difficult settings, but its effect is still dataset-dependent. This is particularly visible on \texttt{breast\_cancer} and \texttt{spambase}, where the Naive and kNN-based approaches lose more performance under \texttt{MNAR} than under \texttt{MAR1} or \texttt{MAR2}, while logistic completion remains relatively more competitive. On \texttt{ionosphere}, however, \texttt{MNAR} is not uniformly the hardest setting, since the Naive model performs better there than under \texttt{MAR1} or \texttt{MAR2}. The \texttt{MAR1} and \texttt{MAR2} settings are often less harmful, although the exact ranking of methods still depends on the dataset. The results therefore indicate that the missingness mechanism is at least as important as the missingness rate itself.
 
 \paragraph{Comparison across missing rates under MCAR.}
-The \texttt{MCAR} sweep shows that robustness to increasing label loss is strongly dataset-dependent. On \texttt{breast\_cancer} and \texttt{spambase}, performance is relatively stable even when half of the training labels are missing. On \texttt{ionosphere}, the degradation with increasing missing rate is much clearer, especially for Naive and kNN completion. On \texttt{madelon}, the unlabeled methods remain best across the full range of missing rates, but both methods still decline as the amount of observed label information becomes smaller. These results confirm that there is no universal response to increasing missingness: some datasets are robust, some degrade gradually, and some show strong differences in robustness between label-completion strategies.
+The \texttt{MCAR} sweep shows that robustness to increasing label loss is strongly dataset-dependent. On \texttt{breast\_cancer} and \texttt{spambase}, performance is relatively stable even when half of the training labels are missing. On \texttt{ionosphere}, the overall decline with increasing missing rate is much clearer, especially for Naive and kNN completion, although the trajectories are not strictly monotone. On \texttt{madelon}, the unlabeled methods remain best across the full range of missing rates, but both methods still decline as the amount of observed label information becomes smaller. These results confirm that there is no universal response to increasing missingness: some datasets are robust, some degrade gradually, and some show strong differences in robustness between label-completion strategies.
 
 \paragraph{Summary of findings.}
-Taken together, the results do not support a single universally best practical method. Instead, three recurring patterns emerge. First, Naive is already very strong on easier datasets such as \texttt{breast\_cancer} and \texttt{spambase}. Second, logistic label completion is most useful in difficult settings, especially under \texttt{MNAR}. Third, the unlabeled methods are particularly effective on \texttt{madelon}, where they substantially outperform both baseline approaches.
+Taken together, the results do not support a single universally best practical method. Instead, three recurring patterns emerge. First, Naive is already very strong on easier datasets such as \texttt{breast\_cancer} and \texttt{spambase}. Second, logistic label completion is most useful in harder settings and is often particularly competitive under \texttt{MNAR}. Third, the unlabeled methods are particularly effective on \texttt{madelon}, where they substantially outperform both baseline approaches.
 
 \section{Conclusions}
 
 The experiments show that the impact of missing labels is highly dataset-dependent, so the methods should not be compared only through a single global average. On \texttt{breast\_cancer} and \texttt{spambase}, the Naive baseline remains very competitive in many settings, especially under \texttt{MCAR}, \texttt{MAR1}, and \texttt{MAR2}. On \texttt{madelon}, however, the unlabeled methods clearly outperform both Oracle and Naive, with logistic completion emerging as the strongest approach across all missingness mechanisms considered at missing rate $0.3$. On \texttt{ionosphere}, no single non-Oracle method dominates all settings, which confirms that the usefulness of label completion depends strongly on the interaction between the missingness mechanism and the dataset structure.
 
-A second important conclusion is that the missingness mechanism matters at least as much as the missingness rate. In particular, \texttt{MNAR} is usually the hardest setting and also the one in which logistic label completion becomes most beneficial. This pattern is visible on \texttt{breast\_cancer}, \texttt{spambase}, and partly on \texttt{madelon}. Under simpler mechanisms such as \texttt{MCAR}, the benefit of unlabeled completion is smaller and sometimes disappears entirely.
+A second important conclusion is that the missingness mechanism matters at least as much as the missingness rate. In particular, \texttt{MNAR} is often the hardest setting and also one of the cases in which logistic label completion becomes most beneficial. This pattern is visible on \texttt{breast\_cancer}, \texttt{spambase}, and partly on \texttt{madelon}, although \texttt{ionosphere} shows that this is not universal. Under simpler mechanisms such as \texttt{MCAR}, the benefit of unlabeled completion is smaller and sometimes disappears entirely.
 
-The \texttt{MCAR} analysis further shows that robustness to increasing missing-label rates depends strongly on the dataset. The \texttt{breast\_cancer} and \texttt{spambase} datasets remain relatively stable even for missing rate $0.5$, whereas \texttt{ionosphere} degrades more clearly as the amount of missing label information increases. On \texttt{madelon}, the unlabeled methods remain best throughout the MCAR sweep, but their performance still decreases at higher missingness rates. Among the two completion variants, logistic completion is generally more robust than kNN when the missing-label rate becomes large.
+The \texttt{MCAR} analysis further shows that robustness to increasing missing-label rates depends strongly on the dataset. The \texttt{breast\_cancer} and \texttt{spambase} datasets remain relatively stable even for missing rate $0.5$, whereas \texttt{ionosphere} shows a clearer overall decline as the amount of missing label information increases, despite some fluctuations across rates. On \texttt{madelon}, the unlabeled methods remain best throughout the MCAR sweep, but their performance still decreases at higher missingness rates. Among the two completion variants, logistic completion is generally more robust than kNN when the missing-label rate becomes large.
 
 The present study also has several limitations. First, the evaluation includes only four datasets, so the conclusions should not be treated as universally valid. Second, only a small set of label-completion strategies was considered. Third, the downstream classifier family was fixed, which means that some conclusions may partly reflect the interaction between the completion method and the chosen classifier rather than the intrinsic quality of the completed labels. Finally, although five random seeds provide a reasonable basis for comparison, some settings still exhibit visible variability.
 
 Several directions for future work are natural. The study could be extended to additional datasets with different levels of dimensionality, class imbalance, and feature redundancy. It would also be valuable to investigate more advanced label-completion strategies, including semi-supervised methods and probabilistic imputation techniques. Another promising direction would be to compare different downstream classifiers after label completion, in order to separate the effect of completion quality from the effect of the final classifier. Finally, the unusual behavior of \texttt{madelon}, where the unlabeled methods strongly outperform the Oracle baseline, deserves deeper investigation and may provide useful insight into when label completion acts as an effective form of regularization.
 \clearpage
+\printbibliography
+\clearpage
 \appendix
-% \clearpage
+\section{Tables}
 
-% \section{Tables}
+The table contains aggregated results from the experiments. It reports summary statistics computed across repeated runs for each dataset, missingness setting, and method.
+\begin{landscape}
+\footnotesize
+\begin{center}
+\textbf{Full summary table from \texttt{final\_summary.csv}}
+\end{center}
 
-% This appendix contains the full aggregated summary table used in the analysis.
-
-% \begin{landscape}
-% \footnotesize
-% \begin{center}
-% \textbf{Full summary table from \texttt{final\_summary.csv}}
-
-% \vspace{0.5cm}
-% \csvautolongtable[respect underscore]{tables/final_summary.csv}
-
-% \end{center}
-% \end{landscape}
-
-% \clearpage
-% \section{Figures}
-
-% This appendix contains the balanced-accuracy plots that were not included in the main text.
-
-% \newcommand{\balappendixplot}[3]{
-% \begin{figure}[H]
-%     \centering
-%     \includegraphics[width=0.88\textwidth]{plots/#1/balanced_accuracy/#2.png}
-%     \caption{#3}
-% \end{figure}
-% }
-
-% \subsection{Breast cancer}
-
-% \balappendixplot{breast_cancer}{delta_to_oracle_missing_rate}
-% {Balanced accuracy on the \texttt{breast\_cancer} dataset: difference to Oracle as a function of missing rate under \texttt{MCAR}.}
-
-% \balappendixplot{breast_cancer}{delta_to_oracle_missing_rate_boxplot}
-% {Balanced accuracy on the \texttt{breast\_cancer} dataset: distribution of differences to Oracle across missing rates.}
-
-% \balappendixplot{breast_cancer}{improvement_over_naive_missing_rate}
-% {Balanced accuracy on the \texttt{breast\_cancer} dataset: improvement over Naive as a function of missing rate.}
-
-% \balappendixplot{breast_cancer}{improvement_over_naive_missing_rate_boxplot}
-% {Balanced accuracy on the \texttt{breast\_cancer} dataset: distribution of improvements over Naive across missing rates.}
-
-% \balappendixplot{breast_cancer}{improvement_over_naive_scheme}
-% {Balanced accuracy on the \texttt{breast\_cancer} dataset: improvement over Naive across missingness schemes.}
-
-% \balappendixplot{breast_cancer}{mcar_trend}
-% {Balanced accuracy on the \texttt{breast\_cancer} dataset under \texttt{MCAR} for different missing rates.}
-
-% \balappendixplot{breast_cancer}{methods_boxplot}
-% {Balanced accuracy on the \texttt{breast\_cancer} dataset: comparison of methods across experimental settings.}
-
-% \balappendixplot{breast_cancer}{missing_rate_boxplot}
-% {Balanced accuracy on the \texttt{breast\_cancer} dataset: distribution across missing rates.}
-
-% \clearpage
-% \subsection{Ionosphere}
-
-% \balappendixplot{ionosphere}{delta_to_oracle_missing_rate}
-% {Balanced accuracy on the \texttt{ionosphere} dataset: difference to Oracle as a function of missing rate under \texttt{MCAR}.}
-
-% \balappendixplot{ionosphere}{delta_to_oracle_missing_rate_boxplot}
-% {Balanced accuracy on the \texttt{ionosphere} dataset: distribution of differences to Oracle across missing rates.}
-
-% \balappendixplot{ionosphere}{delta_to_oracle_scheme}
-% {Balanced accuracy on the \texttt{ionosphere} dataset: difference to Oracle across missingness schemes.}
-
-% \balappendixplot{ionosphere}{improvement_over_naive_missing_rate}
-% {Balanced accuracy on the \texttt{ionosphere} dataset: improvement over Naive as a function of missing rate.}
-
-% \balappendixplot{ionosphere}{improvement_over_naive_missing_rate_boxplot}
-% {Balanced accuracy on the \texttt{ionosphere} dataset: distribution of improvements over Naive across missing rates.}
-
-% \balappendixplot{ionosphere}{improvement_over_naive_scheme}
-% {Balanced accuracy on the \texttt{ionosphere} dataset: improvement over Naive across missingness schemes.}
-
-% \balappendixplot{ionosphere}{methods_boxplot}
-% {Balanced accuracy on the \texttt{ionosphere} dataset: comparison of methods across experimental settings.}
-
-% \balappendixplot{ionosphere}{missing_rate_boxplot}
-% {Balanced accuracy on the \texttt{ionosphere} dataset: distribution across missing rates.}
-
-% \clearpage
-% \subsection{Madelon}
-
-% \balappendixplot{madelon}{delta_to_oracle_missing_rate}
-% {Balanced accuracy on the \texttt{madelon} dataset: difference to Oracle as a function of missing rate under \texttt{MCAR}.}
-
-% \balappendixplot{madelon}{delta_to_oracle_missing_rate_boxplot}
-% {Balanced accuracy on the \texttt{madelon} dataset: distribution of differences to Oracle across missing rates.}
-
-% \balappendixplot{madelon}{improvement_over_naive_missing_rate}
-% {Balanced accuracy on the \texttt{madelon} dataset: improvement over Naive as a function of missing rate.}
-
-% \balappendixplot{madelon}{improvement_over_naive_missing_rate_boxplot}
-% {Balanced accuracy on the \texttt{madelon} dataset: distribution of improvements over Naive across missing rates.}
-
-% \balappendixplot{madelon}{improvement_over_naive_scheme}
-% {Balanced accuracy on the \texttt{madelon} dataset: improvement over Naive across missingness schemes.}
-
-% \balappendixplot{madelon}{methods_boxplot}
-% {Balanced accuracy on the \texttt{madelon} dataset: comparison of methods across experimental settings.}
-
-% \balappendixplot{madelon}{missing_rate_boxplot}
-% {Balanced accuracy on the \texttt{madelon} dataset: distribution across missing rates.}
-
-% \clearpage
-% \subsection{Spambase}
-
-% \balappendixplot{spambase}{delta_to_oracle_missing_rate}
-% {Balanced accuracy on the \texttt{spambase} dataset: difference to Oracle as a function of missing rate under \texttt{MCAR}.}
-
-% \balappendixplot{spambase}{delta_to_oracle_missing_rate_boxplot}
-% {Balanced accuracy on the \texttt{spambase} dataset: distribution of differences to Oracle across missing rates.}
-
-% \balappendixplot{spambase}{improvement_over_naive_missing_rate}
-% {Balanced accuracy on the \texttt{spambase} dataset: improvement over Naive as a function of missing rate.}
-
-% \balappendixplot{spambase}{improvement_over_naive_missing_rate_boxplot}
-% {Balanced accuracy on the \texttt{spambase} dataset: distribution of improvements over Naive across missing rates.}
-
-% \balappendixplot{spambase}{improvement_over_naive_scheme}
-% {Balanced accuracy on the \texttt{spambase} dataset: improvement over Naive across missingness schemes.}
-
-% \balappendixplot{spambase}{mcar_trend}
-% {Balanced accuracy on the \texttt{spambase} dataset under \texttt{MCAR} for different missing rates.}
-
-% \balappendixplot{spambase}{methods_boxplot}
-% {Balanced accuracy on the \texttt{spambase} dataset: comparison of methods across experimental settings.}
-
-% \balappendixplot{spambase}{missing_rate_boxplot}
-% {Balanced accuracy on the \texttt{spambase} dataset: distribution across missing rates.}
-
+\vspace{0.5cm}
+\setlength{\LTleft}{0pt}
+\setlength{\LTright}{0pt}
+\csvreader[
+    respect underscore,
+    before reading={\setlength{\tabcolsep}{4pt}},
+    after reading={\setlength{\tabcolsep}{6pt}},
+    longtable={llll*{9}{r}},
+    table head={
+        \toprule
+        dataset & scheme & method & label completion & missing rate & acc mean & acc std & bal acc mean & bal acc std & F1 mean & F1 std & ROC AUC mean & ROC AUC std\\
+        \midrule
+        \endfirsthead
+        \toprule
+        dataset & scheme & method & label completion & missing rate & acc mean & acc std & bal acc mean & bal acc std & F1 mean & F1 std & ROC AUC mean & ROC AUC std\\
+        \midrule
+        \endhead
+        \midrule
+        \multicolumn{13}{r}{Continued on next page}\\
+        \endfoot
+        \bottomrule
+        \endlastfoot
+    }
+]{../outputs/tables/final_summary.csv}{}{
+    \csvcoli & \csvcolii & \csvcoliii & \csvcoliv &
+    \tablevalue{\csvcolv} &
+    \tablevalue{\csvcolvi} &
+    \tablevalue{\csvcolvii} &
+    \tablevalue{\csvcolviii} &
+    \tablevalue{\csvcolix} &
+    \tablevalue{\csvcolx} &
+    \tablevalue{\csvcolxi} &
+    \tablevalue{\csvcolxii} &
+    \tablevalue{\csvcolxiii}
+}
+\end{landscape}
 
 \clearpage
-\printbibliography
+\section{Figures}
+
+This appendix contains balanced-accuracy plots that were not included in the main text.
+
+\newcommand{\balappendixplot}[3]{
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.82\textwidth]{../outputs/plots/#1/balanced_accuracy/#2.png}
+    \caption{#3}
+\end{figure}
+}
+
+\subsection{Breast cancer}
+
+\balappendixplot{breast_cancer}{delta_to_oracle_missing_rate}
+{Balanced accuracy on the \texttt{breast\_cancer} dataset: difference to Oracle as a function of missing rate under \texttt{MCAR}.}
+
+\balappendixplot{breast_cancer}{delta_to_oracle_missing_rate_boxplot}
+{Balanced accuracy on the \texttt{breast\_cancer} dataset: distribution of differences to Oracle across missing rates.}
+
+\balappendixplot{breast_cancer}{improvement_over_naive_missing_rate}
+{Balanced accuracy on the \texttt{breast\_cancer} dataset: improvement over Naive as a function of missing rate.}
+
+\balappendixplot{breast_cancer}{improvement_over_naive_missing_rate_boxplot}
+{Balanced accuracy on the \texttt{breast\_cancer} dataset: distribution of improvements over Naive across missing rates.}
+
+\balappendixplot{breast_cancer}{improvement_over_naive_scheme}
+{Balanced accuracy on the \texttt{breast\_cancer} dataset: improvement over Naive across missingness schemes.}
+
+\balappendixplot{breast_cancer}{mcar_trend}
+{Balanced accuracy on the \texttt{breast\_cancer} dataset under \texttt{MCAR} for different missing rates.}
+
+\balappendixplot{breast_cancer}{methods_boxplot}
+{Balanced accuracy on the \texttt{breast\_cancer} dataset: comparison of methods across experimental settings.}
+
+\balappendixplot{breast_cancer}{missing_rate_boxplot}
+{Balanced accuracy on the \texttt{breast\_cancer} dataset: distribution across missing rates.}
+
+\clearpage
+\subsection{Ionosphere}
+
+\balappendixplot{ionosphere}{delta_to_oracle_missing_rate}
+{Balanced accuracy on the \texttt{ionosphere} dataset: difference to Oracle as a function of missing rate under \texttt{MCAR}.}
+
+\balappendixplot{ionosphere}{delta_to_oracle_missing_rate_boxplot}
+{Balanced accuracy on the \texttt{ionosphere} dataset: distribution of differences to Oracle across missing rates.}
+
+\balappendixplot{ionosphere}{delta_to_oracle_scheme}
+{Balanced accuracy on the \texttt{ionosphere} dataset: difference to Oracle across missingness schemes.}
+
+\balappendixplot{ionosphere}{improvement_over_naive_missing_rate}
+{Balanced accuracy on the \texttt{ionosphere} dataset: improvement over Naive as a function of missing rate.}
+
+\balappendixplot{ionosphere}{improvement_over_naive_missing_rate_boxplot}
+{Balanced accuracy on the \texttt{ionosphere} dataset: distribution of improvements over Naive across missing rates.}
+
+\balappendixplot{ionosphere}{improvement_over_naive_scheme}
+{Balanced accuracy on the \texttt{ionosphere} dataset: improvement over Naive across missingness schemes.}
+
+\balappendixplot{ionosphere}{methods_boxplot}
+{Balanced accuracy on the \texttt{ionosphere} dataset: comparison of methods across experimental settings.}
+
+\balappendixplot{ionosphere}{missing_rate_boxplot}
+{Balanced accuracy on the \texttt{ionosphere} dataset: distribution across missing rates.}
+
+\clearpage
+\subsection{Madelon}
+
+\balappendixplot{madelon}{delta_to_oracle_missing_rate}
+{Balanced accuracy on the \texttt{madelon} dataset: difference to Oracle as a function of missing rate under \texttt{MCAR}.}
+
+\balappendixplot{madelon}{delta_to_oracle_missing_rate_boxplot}
+{Balanced accuracy on the \texttt{madelon} dataset: distribution of differences to Oracle across missing rates.}
+
+\balappendixplot{madelon}{improvement_over_naive_missing_rate}
+{Balanced accuracy on the \texttt{madelon} dataset: improvement over Naive as a function of missing rate.}
+
+\balappendixplot{madelon}{improvement_over_naive_missing_rate_boxplot}
+{Balanced accuracy on the \texttt{madelon} dataset: distribution of improvements over Naive across missing rates.}
+
+\balappendixplot{madelon}{improvement_over_naive_scheme}
+{Balanced accuracy on the \texttt{madelon} dataset: improvement over Naive across missingness schemes.}
+
+\balappendixplot{madelon}{methods_boxplot}
+{Balanced accuracy on the \texttt{madelon} dataset: comparison of methods across experimental settings.}
+
+\balappendixplot{madelon}{missing_rate_boxplot}
+{Balanced accuracy on the \texttt{madelon} dataset: distribution across missing rates.}
+
+\clearpage
+\subsection{Spambase}
+
+\balappendixplot{spambase}{delta_to_oracle_missing_rate}
+{Balanced accuracy on the \texttt{spambase} dataset: difference to Oracle as a function of missing rate under \texttt{MCAR}.}
+
+\balappendixplot{spambase}{delta_to_oracle_missing_rate_boxplot}
+{Balanced accuracy on the \texttt{spambase} dataset: distribution of differences to Oracle across missing rates.}
+
+\balappendixplot{spambase}{improvement_over_naive_missing_rate}
+{Balanced accuracy on the \texttt{spambase} dataset: improvement over Naive as a function of missing rate.}
+
+\balappendixplot{spambase}{improvement_over_naive_missing_rate_boxplot}
+{Balanced accuracy on the \texttt{spambase} dataset: distribution of improvements over Naive across missing rates.}
+
+\balappendixplot{spambase}{improvement_over_naive_scheme}
+{Balanced accuracy on the \texttt{spambase} dataset: improvement over Naive across missingness schemes.}
+
+\balappendixplot{spambase}{mcar_trend}
+{Balanced accuracy on the \texttt{spambase} dataset under \texttt{MCAR} for different missing rates.}
+
+\balappendixplot{spambase}{methods_boxplot}
+{Balanced accuracy on the \texttt{spambase} dataset: comparison of methods across experimental settings.}
+
+\balappendixplot{spambase}{missing_rate_boxplot}
+{Balanced accuracy on the \texttt{spambase} dataset: distribution across missing rates.}
 
 \end{document}
