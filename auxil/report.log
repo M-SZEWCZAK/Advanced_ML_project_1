@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (MiKTeX 26.2) (preloaded format=pdflatex 2026.4.11)  11 APR 2026 21:13
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (MiKTeX 26.2) (preloaded format=pdflatex 2026.4.11)  12 APR 2026 15:17
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -9,8 +9,8 @@ LaTeX2e <2025-11-01>
 L3 programming layer <2026-01-19>
 (C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/base\article.cls
 Document Class: article 2025/01/22 v1.4n Standard LaTeX document class
-(C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/base\size12.clo
-File: size12.clo 2025/01/22 v1.4n Standard LaTeX file (size option)
+(C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/base\size10.clo
+File: size10.clo 2025/01/22 v1.4n Standard LaTeX file (size option)
 )
 \c@part=\count275
 \c@section=\count276
@@ -119,9 +119,119 @@ Package: array 2025/09/25 v2.6n Tabular extension package (FMi)
 \backup@length=\skip52
 \ar@cellbox=\box54
 )
+(C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/float\float.sty
+Package: float 2001/11/08 v1.3d Float enhancements (AL)
+\c@float@type=\count288
+\float@exts=\toks22
+\float@box=\box55
+\@float@everytoks=\toks23
+\@floatcapt=\box56
+)
+(C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/placeins\placeins.sty
+Package: placeins 2005/04/18  v 2.2
+)
+(C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/pdflscape\pdflscape.sty
+Package: pdflscape 2022-10-27 v0.13 Display of landscape pages in PDF
+
+(C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/pdflscape\pdflscape-nom
+etadata.sty
+Package: pdflscape-nometadata 2022-10-28 v0.13 Display of landscape pages in PD
+F (HO)
+
+(C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/graphics\lscape.sty
+Package: lscape 2020/05/28 v3.02 Landscape Pages (DPC)
+
+(C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphics.sty
+Package: graphics 2024/08/06 v1.4g Standard LaTeX Graphics (DPC,SPQR)
+
+(C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/graphics\trig.sty
+Package: trig 2023/12/02 v1.11 sin cos tan (DPC)
+)
+(C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/graphics-cfg\graphics.c
+fg
+File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
+)
+Package graphics Info: Driver file: pdftex.def on input line 106.
+
+(C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/graphics-def\pdftex.def
+File: pdftex.def 2025/09/29 v1.2d Graphics/color driver for pdftex
+)))
+Package pdflscape Info: Auto-detected driver: pdftex on input line 81.
+))
+(C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/csvsimple\csvsimple.sty
+Package: csvsimple 2024/09/27 v2.7.0 LaTeX CSV file processing
+)
+(C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/csvsimple\csvsimple-leg
+acy.sty
+Package: csvsimple-legacy 2024/09/27 version 2.7.0 LaTeX2e CSV file processing
+
+(C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/pgf/utilities\pgfrcs.st
+y
+(C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/utilities\pgfutil
+-common.tex
+\pgfutil@everybye=\toks24
+\pgfutil@tempdima=\dimen160
+\pgfutil@tempdimb=\dimen161
+)
+(C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/utilities\pgfutil
+-latex.def
+\pgfutil@abb=\box57
+)
+(C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/utilities\pgfrcs.
+code.tex
+(C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/generic/pgf\pgf.revision.tex)
+Package: pgfrcs 2025-08-29 v3.1.11a (3.1.11a)
+))
+(C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/pgf/utilities\pgfkeys.s
+ty
+(C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/utilities\pgfkeys
+.code.tex
+\pgfkeys@pathtoks=\toks25
+\pgfkeys@temptoks=\toks26
+
+(C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/generic/pgf/utilities\pgfkeys
+libraryfiltered.code.tex
+\pgfkeys@tmptoks=\toks27
+)))
+(C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/base\ifthen.sty
+Package: ifthen 2024/03/16 v1.1e Standard LaTeX ifthen package (DPC)
+)
+(C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/etoolbox\etoolbox.sty
+Package: etoolbox 2025/10/02 v2.5m e-TeX tools for LaTeX (JAW)
+\etb@tempcnta=\count289
+)
+(C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/tools\shellesc.sty
+Package: shellesc 2023/07/08 v1.0d unified shell escape interface for LaTeX
+Package shellesc Info: Restricted shell escape enabled on input line 77.
+)
+\csv@file=\read3
+\c@csvinputline=\count290
+\c@csvrow=\count291
+\c@csvcol=\count292
+\csv@out=\write3
+)
+(C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/tools\longtable.sty
+Package: longtable 2025-10-13 v4.24 Multi-page Table package (DPC)
+\LTleft=\skip53
+\LTright=\skip54
+\LTpre=\skip55
+\LTpost=\skip56
+\LTchunksize=\count293
+\LTcapwidth=\dimen162
+\LT@head=\box58
+\LT@firsthead=\box59
+\LT@foot=\box60
+\LT@lastfoot=\box61
+\LT@gbox=\box62
+\LT@cols=\count294
+\LT@rows=\count295
+\c@LT@tables=\count296
+\c@LT@chunks=\count297
+\LT@p@ftn=\toks28
+)
 (C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsmath.sty
 Package: amsmath 2025/07/09 v2.17z AMS math features
-\@mathmargin=\skip53
+\@mathmargin=\skip57
 
 For additional information on amsmath, use the `?' option.
 (C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amstext.sty
@@ -129,61 +239,61 @@ Package: amstext 2024/11/17 v2.01 AMS text
 
 (C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsgen.sty
 File: amsgen.sty 1999/11/30 v2.0 generic functions
-\@emptytoks=\toks22
-\ex@=\dimen160
+\@emptytoks=\toks29
+\ex@=\dimen163
 ))
 (C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsbsy.sty
 Package: amsbsy 1999/11/29 v1.2d Bold Symbols
-\pmbraise@=\dimen161
+\pmbraise@=\dimen164
 )
 (C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsopn.sty
 Package: amsopn 2022/04/08 v2.04 operator names
 )
-\inf@bad=\count288
+\inf@bad=\count298
 LaTeX Info: Redefining \frac on input line 233.
-\uproot@=\count289
-\leftroot@=\count290
+\uproot@=\count299
+\leftroot@=\count300
 LaTeX Info: Redefining \overline on input line 398.
 LaTeX Info: Redefining \colon on input line 409.
-\classnum@=\count291
-\DOTSCASE@=\count292
+\classnum@=\count301
+\DOTSCASE@=\count302
 LaTeX Info: Redefining \ldots on input line 495.
 LaTeX Info: Redefining \dots on input line 498.
 LaTeX Info: Redefining \cdots on input line 619.
-\Mathstrutbox@=\box55
-\strutbox@=\box56
+\Mathstrutbox@=\box63
+\strutbox@=\box64
 LaTeX Info: Redefining \big on input line 721.
 LaTeX Info: Redefining \Big on input line 722.
 LaTeX Info: Redefining \bigg on input line 723.
 LaTeX Info: Redefining \Bigg on input line 724.
-\big@size=\dimen162
+\big@size=\dimen165
 LaTeX Font Info:    Redeclaring font encoding OML on input line 742.
 LaTeX Font Info:    Redeclaring font encoding OMS on input line 743.
-\macc@depth=\count293
+\macc@depth=\count303
 LaTeX Info: Redefining \bmod on input line 904.
 LaTeX Info: Redefining \pmod on input line 909.
 LaTeX Info: Redefining \smash on input line 939.
 LaTeX Info: Redefining \relbar on input line 969.
 LaTeX Info: Redefining \Relbar on input line 970.
-\c@MaxMatrixCols=\count294
+\c@MaxMatrixCols=\count304
 \dotsspace@=\muskip17
-\c@parentequation=\count295
-\dspbrk@lvl=\count296
-\tag@help=\toks23
-\row@=\count297
-\column@=\count298
-\maxfields@=\count299
-\andhelp@=\toks24
-\eqnshift@=\dimen163
-\alignsep@=\dimen164
-\tagshift@=\dimen165
-\tagwidth@=\dimen166
-\totwidth@=\dimen167
-\lineht@=\dimen168
-\@envbody=\toks25
-\multlinegap=\skip54
-\multlinetaggap=\skip55
-\mathdisplay@stack=\toks26
+\c@parentequation=\count305
+\dspbrk@lvl=\count306
+\tag@help=\toks30
+\row@=\count307
+\column@=\count308
+\maxfields@=\count309
+\andhelp@=\toks31
+\eqnshift@=\dimen166
+\alignsep@=\dimen167
+\tagshift@=\dimen168
+\tagwidth@=\dimen169
+\totwidth@=\dimen170
+\lineht@=\dimen171
+\@envbody=\toks32
+\multlinegap=\skip58
+\multlinetaggap=\skip59
+\mathdisplay@stack=\toks33
 LaTeX Info: Redefining \[ on input line 2950.
 LaTeX Info: Redefining \] on input line 2951.
 )
@@ -205,9 +315,6 @@ Package: ltxcmds 2023-12-04 v1.26 LaTeX kernel commands for general use (HO)
 Package pdftexcmds Info: \pdf@primitive is available.
 Package pdftexcmds Info: \pdf@ifprimitive is available.
 Package pdftexcmds Info: \pdfdraftmode found.
-) (C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/etoolbox\etoolbox.sty
-Package: etoolbox 2025/10/02 v2.5m e-TeX tools for LaTeX (JAW)
-\etb@tempcnta=\count300
 )
 (C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/kvoptions\kvoptions.sty
 Package: kvoptions 2022-06-15 v3.15 Key value format for package options (HO)
@@ -216,75 +323,72 @@ Package: kvoptions 2022-06-15 v3.15 Key value format for package options (HO)
 Package: kvsetkeys 2022-10-05 v1.19 Key value parser (HO)
 )) (C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/logreq\logreq.sty
 Package: logreq 2010/08/04 v1.0 xml request logger
-\lrq@indent=\count301
+\lrq@indent=\count310
 
 (C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/logreq\logreq.def
 File: logreq.def 2010/08/04 v1.0 logreq spec v1.0
 ))
-(C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/base\ifthen.sty
-Package: ifthen 2024/03/16 v1.1e Standard LaTeX ifthen package (DPC)
-)
 (C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/url\url.sty
 \Urlmuskip=\muskip18
 Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
 )
-\c@tabx@nest=\count302
-\c@listtotal=\count303
-\c@listcount=\count304
-\c@liststart=\count305
-\c@liststop=\count306
-\c@citecount=\count307
-\c@citetotal=\count308
-\c@multicitecount=\count309
-\c@multicitetotal=\count310
-\c@instcount=\count311
-\c@maxnames=\count312
-\c@minnames=\count313
-\c@maxitems=\count314
-\c@minitems=\count315
-\c@citecounter=\count316
-\c@maxcitecounter=\count317
-\c@savedcitecounter=\count318
-\c@uniquelist=\count319
-\c@uniquename=\count320
-\c@refsection=\count321
-\c@refsegment=\count322
-\c@maxextratitle=\count323
-\c@maxextratitleyear=\count324
-\c@maxextraname=\count325
-\c@maxextradate=\count326
-\c@maxextraalpha=\count327
-\c@abbrvpenalty=\count328
-\c@highnamepenalty=\count329
-\c@lownamepenalty=\count330
-\c@maxparens=\count331
-\c@parenlevel=\count332
-\blx@tempcnta=\count333
-\blx@tempcntb=\count334
-\blx@tempcntc=\count335
-\c@blx@maxsection=\count336
-\blx@maxsegment@0=\count337
-\blx@notetype=\count338
-\blx@parenlevel@text=\count339
-\blx@parenlevel@foot=\count340
-\blx@sectionciteorder@0=\count341
-\blx@sectionciteorderinternal@0=\count342
-\blx@entrysetcounter=\count343
-\blx@biblioinstance=\count344
-\labelnumberwidth=\skip56
-\labelalphawidth=\skip57
-\biblabelsep=\skip58
-\bibitemsep=\skip59
-\bibnamesep=\skip60
-\bibinitsep=\skip61
-\bibparsep=\skip62
-\bibhang=\skip63
-\blx@bcfin=\read3
-\blx@bcfout=\write3
+\c@tabx@nest=\count311
+\c@listtotal=\count312
+\c@listcount=\count313
+\c@liststart=\count314
+\c@liststop=\count315
+\c@citecount=\count316
+\c@citetotal=\count317
+\c@multicitecount=\count318
+\c@multicitetotal=\count319
+\c@instcount=\count320
+\c@maxnames=\count321
+\c@minnames=\count322
+\c@maxitems=\count323
+\c@minitems=\count324
+\c@citecounter=\count325
+\c@maxcitecounter=\count326
+\c@savedcitecounter=\count327
+\c@uniquelist=\count328
+\c@uniquename=\count329
+\c@refsection=\count330
+\c@refsegment=\count331
+\c@maxextratitle=\count332
+\c@maxextratitleyear=\count333
+\c@maxextraname=\count334
+\c@maxextradate=\count335
+\c@maxextraalpha=\count336
+\c@abbrvpenalty=\count337
+\c@highnamepenalty=\count338
+\c@lownamepenalty=\count339
+\c@maxparens=\count340
+\c@parenlevel=\count341
+\blx@tempcnta=\count342
+\blx@tempcntb=\count343
+\blx@tempcntc=\count344
+\c@blx@maxsection=\count345
+\blx@maxsegment@0=\count346
+\blx@notetype=\count347
+\blx@parenlevel@text=\count348
+\blx@parenlevel@foot=\count349
+\blx@sectionciteorder@0=\count350
+\blx@sectionciteorderinternal@0=\count351
+\blx@entrysetcounter=\count352
+\blx@biblioinstance=\count353
+\labelnumberwidth=\skip60
+\labelalphawidth=\skip61
+\biblabelsep=\skip62
+\bibitemsep=\skip63
+\bibnamesep=\skip64
+\bibinitsep=\skip65
+\bibparsep=\skip66
+\bibhang=\skip67
+\blx@bcfin=\read4
+\blx@bcfout=\write4
 \blx@langwohyphens=\language80
-\c@mincomprange=\count345
-\c@maxcomprange=\count346
-\c@mincompwidth=\count347
+\c@mincomprange=\count354
+\c@maxcomprange=\count355
+\c@mincompwidth=\count356
 Package biblatex Info: Trying to load biblatex default data model...
 Package biblatex Info: ... file 'blx-dm.def' found.
 
@@ -295,88 +399,88 @@ Package biblatex Info: Trying to load biblatex style data model...
 Package biblatex Info: ... file 'ieee.dbx' not found.
 Package biblatex Info: Trying to load biblatex custom data model...
 Package biblatex Info: ... file 'biblatex-dm.cfg' not found.
-\c@afterword=\count348
-\c@savedafterword=\count349
-\c@annotator=\count350
-\c@savedannotator=\count351
-\c@author=\count352
-\c@savedauthor=\count353
-\c@bookauthor=\count354
-\c@savedbookauthor=\count355
-\c@commentator=\count356
-\c@savedcommentator=\count357
-\c@editor=\count358
-\c@savededitor=\count359
-\c@editora=\count360
-\c@savededitora=\count361
-\c@editorb=\count362
-\c@savededitorb=\count363
-\c@editorc=\count364
-\c@savededitorc=\count365
-\c@foreword=\count366
-\c@savedforeword=\count367
-\c@holder=\count368
-\c@savedholder=\count369
-\c@introduction=\count370
-\c@savedintroduction=\count371
-\c@namea=\count372
-\c@savednamea=\count373
-\c@nameb=\count374
-\c@savednameb=\count375
-\c@namec=\count376
-\c@savednamec=\count377
-\c@translator=\count378
-\c@savedtranslator=\count379
-\c@shortauthor=\count380
-\c@savedshortauthor=\count381
-\c@shorteditor=\count382
-\c@savedshorteditor=\count383
-\c@labelname=\count384
-\c@savedlabelname=\count385
-\c@institution=\count386
-\c@savedinstitution=\count387
-\c@lista=\count388
-\c@savedlista=\count389
-\c@listb=\count390
-\c@savedlistb=\count391
-\c@listc=\count392
-\c@savedlistc=\count393
-\c@listd=\count394
-\c@savedlistd=\count395
-\c@liste=\count396
-\c@savedliste=\count397
-\c@listf=\count398
-\c@savedlistf=\count399
-\c@location=\count400
-\c@savedlocation=\count401
-\c@organization=\count402
-\c@savedorganization=\count403
-\c@origlocation=\count404
-\c@savedoriglocation=\count405
-\c@origpublisher=\count406
-\c@savedorigpublisher=\count407
-\c@publisher=\count408
-\c@savedpublisher=\count409
-\c@language=\count410
-\c@savedlanguage=\count411
-\c@origlanguage=\count412
-\c@savedoriglanguage=\count413
-\c@pageref=\count414
-\c@savedpageref=\count415
-\shorthandwidth=\skip64
-\shortjournalwidth=\skip65
-\shortserieswidth=\skip66
-\shorttitlewidth=\skip67
-\shortauthorwidth=\skip68
-\shorteditorwidth=\skip69
-\locallabelnumberwidth=\skip70
-\locallabelalphawidth=\skip71
-\localshorthandwidth=\skip72
-\localshortjournalwidth=\skip73
-\localshortserieswidth=\skip74
-\localshorttitlewidth=\skip75
-\localshortauthorwidth=\skip76
-\localshorteditorwidth=\skip77
+\c@afterword=\count357
+\c@savedafterword=\count358
+\c@annotator=\count359
+\c@savedannotator=\count360
+\c@author=\count361
+\c@savedauthor=\count362
+\c@bookauthor=\count363
+\c@savedbookauthor=\count364
+\c@commentator=\count365
+\c@savedcommentator=\count366
+\c@editor=\count367
+\c@savededitor=\count368
+\c@editora=\count369
+\c@savededitora=\count370
+\c@editorb=\count371
+\c@savededitorb=\count372
+\c@editorc=\count373
+\c@savededitorc=\count374
+\c@foreword=\count375
+\c@savedforeword=\count376
+\c@holder=\count377
+\c@savedholder=\count378
+\c@introduction=\count379
+\c@savedintroduction=\count380
+\c@namea=\count381
+\c@savednamea=\count382
+\c@nameb=\count383
+\c@savednameb=\count384
+\c@namec=\count385
+\c@savednamec=\count386
+\c@translator=\count387
+\c@savedtranslator=\count388
+\c@shortauthor=\count389
+\c@savedshortauthor=\count390
+\c@shorteditor=\count391
+\c@savedshorteditor=\count392
+\c@labelname=\count393
+\c@savedlabelname=\count394
+\c@institution=\count395
+\c@savedinstitution=\count396
+\c@lista=\count397
+\c@savedlista=\count398
+\c@listb=\count399
+\c@savedlistb=\count400
+\c@listc=\count401
+\c@savedlistc=\count402
+\c@listd=\count403
+\c@savedlistd=\count404
+\c@liste=\count405
+\c@savedliste=\count406
+\c@listf=\count407
+\c@savedlistf=\count408
+\c@location=\count409
+\c@savedlocation=\count410
+\c@organization=\count411
+\c@savedorganization=\count412
+\c@origlocation=\count413
+\c@savedoriglocation=\count414
+\c@origpublisher=\count415
+\c@savedorigpublisher=\count416
+\c@publisher=\count417
+\c@savedpublisher=\count418
+\c@language=\count419
+\c@savedlanguage=\count420
+\c@origlanguage=\count421
+\c@savedoriglanguage=\count422
+\c@pageref=\count423
+\c@savedpageref=\count424
+\shorthandwidth=\skip68
+\shortjournalwidth=\skip69
+\shortserieswidth=\skip70
+\shorttitlewidth=\skip71
+\shortauthorwidth=\skip72
+\shorteditorwidth=\skip73
+\locallabelnumberwidth=\skip74
+\locallabelalphawidth=\skip75
+\localshorthandwidth=\skip76
+\localshortjournalwidth=\skip77
+\localshortserieswidth=\skip78
+\localshorttitlewidth=\skip79
+\localshortauthorwidth=\skip80
+\localshorteditorwidth=\skip81
 Package biblatex Info: Trying to load compatibility code...
 Package biblatex Info: ... file 'blx-compat.def' found.
 
@@ -397,19 +501,19 @@ Package biblatex Info: Trying to load generic definitions...
 Package biblatex Info: ... file 'biblatex.def' found.
  (C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/biblatex\biblatex.def
 File: biblatex.def 2025/07/10 v3.21 biblatex compatibility (PK/MW)
-\c@textcitecount=\count416
-\c@textcitetotal=\count417
-\c@textcitemaxnames=\count418
-\c@biburlbigbreakpenalty=\count419
-\c@biburlbreakpenalty=\count420
-\c@biburlnumpenalty=\count421
-\c@biburlucpenalty=\count422
-\c@biburllcpenalty=\count423
+\c@textcitecount=\count425
+\c@textcitetotal=\count426
+\c@textcitemaxnames=\count427
+\c@biburlbigbreakpenalty=\count428
+\c@biburlbreakpenalty=\count429
+\c@biburlnumpenalty=\count430
+\c@biburlucpenalty=\count431
+\c@biburllcpenalty=\count432
 \biburlbigskip=\muskip19
 \biburlnumskip=\muskip20
 \biburlucskip=\muskip21
 \biburllcskip=\muskip22
-\c@smartand=\count424
+\c@smartand=\count433
 )
 Package biblatex Info: Trying to load bibliography style 'ieee'...
 Package biblatex Info: ... file 'ieee.bbx' found.
@@ -434,8 +538,8 @@ Package biblatex Info: ... file 'standard.bbx' found.
 (C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/biblatex/bbx\standard.b
 bx
 File: standard.bbx 2025/07/10 v3.21 biblatex bibliography style (PK/MW)
-\c@bbx:relatedcount=\count425
-\c@bbx:relatedtotal=\count426
+\c@bbx:relatedcount=\count434
+\c@bbx:relatedtotal=\count435
 ))))
 Package biblatex Info: Trying to load citation style 'ieee'...
 Package biblatex Info: ... file 'ieee.cbx' found.
@@ -474,7 +578,7 @@ Package: expl3 2026-01-19 L3 programming layer (loader)
 (C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/l3backend\l3backend-pdf
 tex.def
 File: l3backend-pdftex.def 2025-10-09 L3 backend support: PDF output (pdfTeX)
-\l__color_backend_stack_int=\count427
+\l__color_backend_stack_int=\count436
 ))
 Package biblatex Info: ... and expl3
 (biblatex)             2026-01-19 L3 programming layer (loader) 
@@ -494,66 +598,54 @@ Package: caption 2023/08/05 v3.6o Customizing captions (AR)
 
 (C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/caption\caption3.sty
 Package: caption3 2023/07/31 v2.4d caption3 kernel (AR)
-\caption@tempdima=\dimen169
-\captionmargin=\dimen170
-\caption@leftmargin=\dimen171
-\caption@rightmargin=\dimen172
-\caption@width=\dimen173
-\caption@indent=\dimen174
-\caption@parindent=\dimen175
-\caption@hangindent=\dimen176
+\caption@tempdima=\dimen172
+\captionmargin=\dimen173
+\caption@leftmargin=\dimen174
+\caption@rightmargin=\dimen175
+\caption@width=\dimen176
+\caption@indent=\dimen177
+\caption@parindent=\dimen178
+\caption@hangindent=\dimen179
 Package caption Info: Standard document class detected.
 )
-\c@caption@flags=\count428
-\c@continuedfloat=\count429
-)
-(C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/caption\subcaption.sty
+\c@caption@flags=\count437
+\c@continuedfloat=\count438
+Package caption Info: float package is loaded.
+Package caption Info: longtable package is loaded.
+
+(C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/caption\ltcaption.sty
+Package: ltcaption 2021/01/08 v1.4c longtable captions (AR)
+)) (C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/caption\subcaption.s
+ty
 Package: subcaption 2023/07/28 v1.6b Sub-captions (AR)
 Package caption Info: New subtype `subfigure' on input line 238.
-\c@subfigure=\count430
+\c@subfigure=\count439
 Package caption Info: New subtype `subtable' on input line 238.
-\c@subtable=\count431
+\c@subtable=\count440
 ) (C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/booktabs\booktabs.sty
 Package: booktabs 2020/01/12 v1.61803398 Publication quality tables
-\heavyrulewidth=\dimen177
-\lightrulewidth=\dimen178
-\cmidrulewidth=\dimen179
-\belowrulesep=\dimen180
-\belowbottomsep=\dimen181
-\aboverulesep=\dimen182
-\abovetopsep=\dimen183
-\cmidrulesep=\dimen184
-\cmidrulekern=\dimen185
-\defaultaddspace=\dimen186
-\@cmidla=\count432
-\@cmidlb=\count433
-\@aboverulesep=\dimen187
-\@belowrulesep=\dimen188
-\@thisruleclass=\count434
-\@lastruleclass=\count435
-\@thisrulewidth=\dimen189
+\heavyrulewidth=\dimen180
+\lightrulewidth=\dimen181
+\cmidrulewidth=\dimen182
+\belowrulesep=\dimen183
+\belowbottomsep=\dimen184
+\aboverulesep=\dimen185
+\abovetopsep=\dimen186
+\cmidrulesep=\dimen187
+\cmidrulekern=\dimen188
+\defaultaddspace=\dimen189
+\@cmidla=\count441
+\@cmidlb=\count442
+\@aboverulesep=\dimen190
+\@belowrulesep=\dimen191
+\@thisruleclass=\count443
+\@lastruleclass=\count444
+\@thisrulewidth=\dimen192
 ) (C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphicx.sty
 Package: graphicx 2024/12/31 v1.2e Enhanced LaTeX Graphics (DPC,SPQR)
-
-(C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphics.sty
-Package: graphics 2024/08/06 v1.4g Standard LaTeX Graphics (DPC,SPQR)
-
-(C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/graphics\trig.sty
-Package: trig 2023/12/02 v1.11 sin cos tan (DPC)
-)
-(C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/graphics-cfg\graphics.c
-fg
-File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
-)
-Package graphics Info: Driver file: pdftex.def on input line 106.
-
-(C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/graphics-def\pdftex.def
-File: pdftex.def 2025/09/29 v1.2d Graphics/color driver for pdftex
-))
-\Gin@req@height=\dimen190
-\Gin@req@width=\dimen191
-)
-(C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\amssymb.sty
+\Gin@req@height=\dimen193
+\Gin@req@width=\dimen194
+) (C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\amssymb.sty
 Package: amssymb 2013/01/14 v3.01 AMS font symbols
 
 (C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\amsfonts.sty
@@ -566,34 +658,38 @@ LaTeX Font Info:    Overwriting math alphabet `\mathfrak' in version `bold'
 )) (C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/multirow\multirow.st
 y
 Package: multirow 2024/11/12 v2.9 Span multiple rows of a table
-\multirow@colwidth=\skip78
-\multirow@cntb=\count436
-\multirow@dima=\skip79
-\bigstrutjot=\dimen192
+\multirow@colwidth=\skip82
+\multirow@cntb=\count445
+\multirow@dima=\skip83
+\bigstrutjot=\dimen195
 )
 
 Package biblatex Warning: 'babel/polyglossia' detected but 'csquotes' missing.
 (biblatex)                Loading 'csquotes' recommended.
 
-\@quotelevel=\count437
-\@quotereset=\count438
+\@quotelevel=\count446
+\@quotereset=\count447
+
+LaTeX Warning: Unused global option(s):
+    [8pt].
+
 (C:/Users\andrz\Advanced_ML_project_1\out\report.aux)
 \openout1 = `report.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 34.
-LaTeX Font Info:    ... okay on input line 34.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 34.
-LaTeX Font Info:    ... okay on input line 34.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 34.
-LaTeX Font Info:    ... okay on input line 34.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 34.
-LaTeX Font Info:    ... okay on input line 34.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 34.
-LaTeX Font Info:    ... okay on input line 34.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 34.
-LaTeX Font Info:    ... okay on input line 34.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 34.
-LaTeX Font Info:    ... okay on input line 34.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 41.
+LaTeX Font Info:    ... okay on input line 41.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 41.
+LaTeX Font Info:    ... okay on input line 41.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 41.
+LaTeX Font Info:    ... okay on input line 41.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 41.
+LaTeX Font Info:    ... okay on input line 41.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 41.
+LaTeX Font Info:    ... okay on input line 41.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 41.
+LaTeX Font Info:    ... okay on input line 41.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 41.
+LaTeX Font Info:    ... okay on input line 41.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
@@ -614,12 +710,12 @@ LaTeX Font Info:    ... okay on input line 34.
 * \topmargin=-38.1381pt
 * \headheight=12.0pt
 * \headsep=25.0pt
-* \topskip=12.0pt
+* \topskip=10.0pt
 * \footskip=30.0pt
-* \marginparwidth=35.0pt
-* \marginparsep=10.0pt
+* \marginparwidth=57.0pt
+* \marginparsep=11.0pt
 * \columnsep=10.0pt
-* \skip\footins=10.8pt plus 4.0pt minus 2.0pt
+* \skip\footins=9.0pt plus 4.0pt minus 2.0pt
 * \hoffset=0.0pt
 * \voffset=0.0pt
 * \mag=1000
@@ -629,6 +725,32 @@ LaTeX Font Info:    ... okay on input line 34.
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
+
+(C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/context/base/mkii\supp-pdf.mk
+ii
+[Loading MPS to PDF converter (version 2006.09.02).]
+\scratchcounter=\count448
+\scratchdimen=\dimen196
+\scratchbox=\box65
+\nofMPsegments=\count449
+\nofMParguments=\count450
+\everyMPshowfont=\toks34
+\MPscratchCnt=\count451
+\MPscratchDim=\dimen197
+\MPnumerator=\count452
+\makeMPintoPDFobject=\count453
+\everyMPtoPDFconversion=\toks35
+)
+(C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/epstopdf-pkg\epstopdf-b
+ase.sty
+Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
+Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
+85.
+
+(C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/00miktex\epstopdf-sys.c
+fg
+File: epstopdf-sys.cfg 2021/03/18 v2.0 Configuration of epstopdf for MiKTeX
+))
 Package biblatex Info: Trying to load language 'english'...
 Package biblatex Info: ... file 'english.lbx' found.
 
@@ -642,48 +764,22 @@ Package biblatex Info: Automatic encoding selection.
 Package biblatex Info: Input encoding 'utf8' detected.
 Package biblatex Info: Data encoding 'utf8' specified.
 (biblatex)             No need to reencode data.
-\openout3 = `report-blx.bib'.
+\openout4 = `report-blx.bib'.
 
 Package biblatex Info: Trying to load bibliographic data...
 Package biblatex Info: ... file 'report.bbl' not found.
 
 No file report.bbl.
-Package biblatex Info: Reference section=0 on input line 34.
-Package biblatex Info: Reference segment=0 on input line 34.
+Package biblatex Info: Reference section=0 on input line 41.
+Package biblatex Info: Reference segment=0 on input line 41.
 Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: End \AtBeginDocument code.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 43.
 
-(C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/context/base/mkii\supp-pdf.mk
-ii
-[Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count439
-\scratchdimen=\dimen193
-\scratchbox=\box57
-\nofMPsegments=\count440
-\nofMParguments=\count441
-\everyMPshowfont=\toks27
-\MPscratchCnt=\count442
-\MPscratchDim=\dimen194
-\MPnumerator=\count443
-\makeMPintoPDFobject=\count444
-\everyMPtoPDFconversion=\toks28
-)
-(C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/epstopdf-pkg\epstopdf-b
-ase.sty
-Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
-Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
-85.
-
-(C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/00miktex\epstopdf-sys.c
-fg
-File: epstopdf-sys.cfg 2021/03/18 v2.0 Configuration of epstopdf for MiKTeX
-))
-LaTeX Font Info:    Trying to load font information for U+msa on input line 36.
-
- (C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsa.fd
+(C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 36.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 43.
 
 
 (C:\Users\andrz\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsb.fd
@@ -691,47 +787,190 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
 [1
 
-{C:/Users/andrz/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}]
-No file report.toc.
-\tf@toc=\write4
-\openout4 = `report.toc'.
+{C:/Users/andrz/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}] [2]
+(C:/Users\andrz\Advanced_ML_project_1\auxil\report.toc)
+\tf@toc=\write5
+\openout5 = `report.toc'.
 
-[2] [3] (C:/Users\andrz\Advanced_ML_project_1\out\report.aux)
+ [3]
+
+LaTeX Warning: Citation 'beck2009fast' on page 4 undefined on input line 70.
+
+
+LaTeX Warning: Citation 'beck2009fast' on page 4 undefined on input line 74.
+
+[4]
+
+LaTeX Warning: Citation 'beck2009fast' on page 5 undefined on input line 78.
+
+
+LaTeX Warning: Citation 'beck2009fast' on page 5 undefined on input line 83.
+
+[5]
+
+LaTeX Warning: File `plots/breast_cancer/balanced_accuracy/delta_to_oracle_sche
+me.png' not found on input line 105.
+
+
+report.tex:105: Package pdftex.def Error: File `plots/breast_cancer/balanced_ac
+curacy/delta_to_oracle_scheme.png' not found: using draft setting.
+
+See the pdftex.def package documentation for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.105 ...nced_accuracy/delta_to_oracle_scheme.png}
+                                                  
+Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+[6]
+
+LaTeX Warning: Reference `fig:scheme-breast-cancer' on page 7 undefined on inpu
+t line 111.
+
+
+LaTeX Warning: File `plots/ionosphere/balanced_accuracy/mcar_trend.png' not fou
+nd on input line 115.
+
+
+report.tex:115: Package pdftex.def Error: File `plots/ionosphere/balanced_accur
+acy/mcar_trend.png' not found: using draft setting.
+
+See the pdftex.def package documentation for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.115 ...osphere/balanced_accuracy/mcar_trend.png}
+                                                  
+Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+[7]
+
+LaTeX Warning: Reference `fig:mcar-ionosphere' on page 8 undefined on input lin
+e 121.
+
+
+LaTeX Warning: File `plots/madelon/balanced_accuracy/delta_to_oracle_scheme.png
+' not found on input line 125.
+
+
+report.tex:125: Package pdftex.def Error: File `plots/madelon/balanced_accuracy
+/delta_to_oracle_scheme.png' not found: using draft setting.
+
+See the pdftex.def package documentation for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.125 ...nced_accuracy/delta_to_oracle_scheme.png}
+                                                  
+Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+[8]
+
+LaTeX Warning: File `plots/madelon/balanced_accuracy/mcar_trend.png' not found 
+on input line 132.
+
+
+report.tex:132: Package pdftex.def Error: File `plots/madelon/balanced_accuracy
+/mcar_trend.png' not found: using draft setting.
+
+See the pdftex.def package documentation for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.132 ...madelon/balanced_accuracy/mcar_trend.png}
+                                                  
+Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+[9]
+
+LaTeX Warning: Reference `fig:scheme-madelon' on page 10 undefined on input lin
+e 138.
+
+
+LaTeX Warning: Reference `fig:mcar-madelon' on page 10 undefined on input line 
+138.
+
+
+LaTeX Warning: File `plots/spambase/balanced_accuracy/delta_to_oracle_scheme.pn
+g' not found on input line 142.
+
+
+report.tex:142: Package pdftex.def Error: File `plots/spambase/balanced_accurac
+y/delta_to_oracle_scheme.png' not found: using draft setting.
+
+See the pdftex.def package documentation for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.142 ...nced_accuracy/delta_to_oracle_scheme.png}
+                                                  
+Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+[10]
+
+LaTeX Warning: Reference `fig:scheme-spambase' on page 11 undefined on input li
+ne 148.
+
+[11] [12]
+
+LaTeX Warning: Empty bibliography on input line 308.
+
+(C:/Users\andrz\Advanced_ML_project_1\out\report.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2026-01-19>
  ***********
+
+
+LaTeX Warning: There were undefined references.
+
+
+Package biblatex Warning: Please (re)run BibTeX on the file(s):
+(biblatex)                report
+(biblatex)                and rerun LaTeX afterwards.
+
 Package logreq Info: Writing requests to 'report.run.xml'.
 \openout1 = `report.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 14215 strings out of 467867
- 261122 string characters out of 5418334
- 887016 words of memory out of 5000000
- 42939 multiletter control sequences out of 15000+600000
- 641632 words of font info for 80 fonts, out of 8000000 for 9000
+ 16179 strings out of 467867
+ 314483 string characters out of 5418334
+ 933402 words of memory out of 5000000
+ 44833 multiletter control sequences out of 15000+600000
+ 644034 words of font info for 82 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 63i,6n,66p,1854b,1755s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 89i,6n,95p,1887b,1811s stack positions out of 10000i,1000n,20000p,200000b,200000s
  <C:\Users\andrz\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm
-1200.pk> <C:\Users\andrz\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi60
-0\ecbx1440.pk> <C:\Users\andrz\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec
-/dpi600\ecbx1728.pk> <C:\Users\andrz\AppData\Local\MiKTeX\fonts/pk/ljfour/jknap
-pen/ec/dpi600\ecrm1200.pk> <C:\Users\andrz\AppData\Local\MiKTeX\fonts/pk/ljfour
-/jknappen/ec/dpi600\ecrm1440.pk> <C:\Users\andrz\AppData\Local\MiKTeX\fonts/pk/
-ljfour/jknappen/ec/dpi600\ecbx2074.pk><C:/Users/andrz/AppData/Local/Programs/Mi
-KTeX/fonts/type1/public/amsfonts/cm/cmbx12.pfb><C:/Users/andrz/AppData/Local/Pr
-ograms/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/andrz/AppData
-/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Users/andr
-z/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Us
-ers/andrz/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr12.pf
-b><C:/Users/andrz/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/
-cmr8.pfb><C:/Users/andrz/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfo
-nts/cm/cmsy10.pfb>
-Output written on C:/Users\andrz\Advanced_ML_project_1\out\report.pdf (3 pages,
- 117493 bytes).
+1000.pk> <C:\Users\andrz\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi60
+0\ecbx1200.pk> <C:\Users\andrz\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec
+/dpi600\ecti1000.pk> <C:\Users\andrz\AppData\Local\MiKTeX\fonts/pk/ljfour/jknap
+pen/ec/dpi600\ectt1000.pk> <C:\Users\andrz\AppData\Local\MiKTeX\fonts/pk/ljfour
+/jknappen/ec/dpi600\ecbx1000.pk> <C:\Users\andrz\AppData\Local\MiKTeX\fonts/pk/
+ljfour/jknappen/ec/dpi600\ecbx1440.pk> <C:\Users\andrz\AppData\Local\MiKTeX\fon
+ts/pk/ljfour/jknappen/ec/dpi600\ecbx0900.pk> <C:\Users\andrz\AppData\Local\MiKT
+eX\fonts/pk/ljfour/jknappen/ec/dpi600\ecrm1000.pk> <C:\Users\andrz\AppData\Loca
+l\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecrm1200.pk> <C:\Users\andrz\AppDat
+a\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbx1728.pk><C:/Users/andrz/A
+ppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx10.pfb><C:/User
+s/andrz/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb
+><C:/Users/andrz/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/c
+mmi10.pfb><C:/Users/andrz/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsf
+onts/cm/cmmi7.pfb><C:/Users/andrz/AppData/Local/Programs/MiKTeX/fonts/type1/pub
+lic/amsfonts/cm/cmr10.pfb><C:/Users/andrz/AppData/Local/Programs/MiKTeX/fonts/t
+ype1/public/amsfonts/cm/cmr5.pfb><C:/Users/andrz/AppData/Local/Programs/MiKTeX/
+fonts/type1/public/amsfonts/cm/cmr7.pfb><C:/Users/andrz/AppData/Local/Programs/
+MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb>
+Output written on C:/Users\andrz\Advanced_ML_project_1\out\report.pdf (12 pages
+, 196526 bytes).
 PDF statistics:
- 198 PDF objects out of 1000 (max. 8388607)
+ 385 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 
