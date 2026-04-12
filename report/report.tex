@@ -1,5 +1,8 @@
 \documentclass[8pt, a4paper]{article}
 
+\setcounter{tocdepth}{2}
+
+
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[english]{babel}
@@ -21,7 +24,7 @@
 \newcommand{\sigmoid}{\operatorname{\sigma}}
 
 \usepackage[backend=bibtex, style=ieee]{biblatex}
-\addbibresource{bibliography.bib}
+\addbibresource{./bibliography.bib}
 
 \usepackage{caption}
 \usepackage{subcaption}
@@ -30,6 +33,7 @@
 \usepackage{graphicx}
 \usepackage{amssymb}
 \usepackage{multirow}
+\usepackage{amsopn}
 
 \title{
     \textbf{Project I - Logistic regression} \\[0.5cm]
@@ -102,7 +106,7 @@ Unless stated otherwise, the discussion in this section is based primarily on ba
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{plots/breast_cancer/balanced_accuracy/delta_to_oracle_scheme.png}
+    \includegraphics[width=0.8\textwidth]{../outputs/plots/breast_cancer/balanced_accuracy/delta_to_oracle_scheme.png}
     \caption{Difference in balanced accuracy to the Oracle model on the \texttt{breast\_cancer} dataset for the three non-MCAR missingness mechanisms at missing rate $0.3$. Smaller absolute gap to Oracle indicates stronger performance.}
     \label{fig:scheme-breast-cancer}
 \end{figure}
@@ -112,7 +116,7 @@ The \texttt{breast\_cancer} dataset is the most stable setting in the study. All
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{plots/ionosphere/balanced_accuracy/mcar_trend.png}
+    \includegraphics[width=0.8\textwidth]{../outputs/plots/ionosphere/balanced_accuracy/mcar_trend.png}
     \caption{Balanced accuracy as a function of missing rate under \texttt{MCAR} for the \texttt{ionosphere} dataset. This figure illustrates the sensitivity of the methods to increasing proportions of missing training labels.}
     \label{fig:mcar-ionosphere}
 \end{figure}
@@ -122,14 +126,14 @@ The \texttt{ionosphere} dataset is noticeably more sensitive to the missingness 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{plots/madelon/balanced_accuracy/delta_to_oracle_scheme.png}
+    \includegraphics[width=0.8\textwidth]{../outputs/plots/madelon/balanced_accuracy/delta_to_oracle_scheme.png}
     \caption{Difference in balanced accuracy to the Oracle model on the \texttt{madelon} dataset for \texttt{MAR1}, \texttt{MAR2}, and \texttt{MNAR} at missing rate $0.3$. The unlabeled methods substantially outperform both Oracle and Naive.}
     \label{fig:scheme-madelon}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{plots/madelon/balanced_accuracy/mcar_trend.png}
+    \includegraphics[width=0.8\textwidth]{../outputs/plots/madelon/balanced_accuracy/mcar_trend.png}
     \caption{Balanced accuracy under \texttt{MCAR} on the \texttt{madelon} dataset as the missing rate increases from $0.1$ to $0.5$. The unlabeled methods remain strongest, while logistic completion degrades more gradually than kNN at higher missing rates.}
     \label{fig:mcar-madelon}
 \end{figure}
@@ -139,7 +143,7 @@ The \texttt{madelon} dataset exhibits the most distinctive behavior in the entir
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{plots/spambase/balanced_accuracy/delta_to_oracle_scheme.png}
+    \includegraphics[width=0.8\textwidth]{../outputs/plots/spambase/balanced_accuracy/delta_to_oracle_scheme.png}
     \caption{Difference in balanced accuracy to the Oracle model on the \texttt{spambase} dataset for \texttt{MAR1}, \texttt{MAR2}, and \texttt{MNAR} at missing rate $0.3$.}
     \label{fig:scheme-spambase}
 \end{figure}
